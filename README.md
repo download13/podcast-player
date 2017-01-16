@@ -1,3 +1,3 @@
 # Podcast Player
 
-Live application available at https://podcast-player.gomix.me/
+Live application available at https://podcasts.erindachtler.me/

@@ -1,9 +1,13 @@
 version: "2"
 services:
-  web:
+  podcasts-server:
     build: .
-    restart: always
+    restart: unless-stopped
     environment:
       - NODE_ENV=production
-    ports:
-      - "80:80"
+    networks:
+      - webserver
+
+networks:
+  webserver:
+      external: true
