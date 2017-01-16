@@ -8,6 +8,7 @@
     "build": "webpack -p",
     "serve": "nodemon dist/server.js"
   },
+  "main": "dist/server.js",
   "dependencies": {
     "async-cache": "^1.1.0",
     "express": "^4.14.0",
