@@ -40,7 +40,6 @@ export default class Player extends Component {
     audioEl.onplaying = audioEl.onpause = () => {
       this.setState({playing: !audioEl.paused})
     };
-    // TODO: State change, change playing
 
     window.onbeforeunload = () => this.save();
 
@@ -85,7 +84,6 @@ export default class Player extends Component {
       <audio
         class="audio"
         ref={el => this.audioEl = el}
-        autoplay={autoplay}
         preload="auto"
         src={currentAudioUrl}
         onPause={() => this.save()}
