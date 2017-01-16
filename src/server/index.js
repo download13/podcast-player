@@ -107,5 +107,10 @@ function sendRemoteFile(req, res, url) {
       res.append('Content-Range', headers['content-range']);
     }
   })
-  .pipe(res, {end: true});
+  .pipe(res, {end: true})
+  .on('error', err => {
+    console.error('sendRemoteFile error');
+    console.error(err);
+    res.end();
+  });
 }
