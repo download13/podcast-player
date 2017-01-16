@@ -82,10 +82,7 @@ app.get('/p/:podcast/episodes/:index/audio', (req, res) => {
   );
 });
 
-const address = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
-const port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 80;
-
-const listener = app.listen(port, address, () => {
+const listener = app.listen(process.env.PORT || 80, () => {
   console.log('Listening on port ' + listener.address().port);
 });
 

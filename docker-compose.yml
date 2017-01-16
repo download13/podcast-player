@@ -1,0 +1,9 @@
+version: "2"
+services:
+  web:
+    build: .
+    restart: always
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "80:80"
