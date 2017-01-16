@@ -1,0 +1,14 @@
+{
+  "name": "Podcast Player",
+  "short_name": "Podcasts",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#f92977",
+  "background_color": "#fff6f4",
+  "description": "Easy listening for your favorite podcast!",
+  "icons": [{
+    "src": "/images/logo_144.png",
+    "sizes": "144x144",
+    "type": "image/png"
+  }]
+}
