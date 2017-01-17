@@ -149,8 +149,9 @@ export default class Player extends Component {
   }
 
   selectEpisode(index) {
+    const {audioEl} = this;
     const {podcast} = this.props;
-    const {episodes, currentImageUrl, currentAudioUrl} = this.state;
+    const {episodes, currentImageUrl, currentAudioUrl, playing} = this.state;
     const imageUrl = getImageUrl(podcast, index);
     const audioUrl = getAudioUrl(podcast, index);
 
@@ -174,6 +175,13 @@ export default class Player extends Component {
         currentImageUrl: imgBlob ? URL.createObjectURL(imgBlob) : imageUrl,
         currentAudioUrl: audioBlob ? URL.createObjectURL(audioBlob) : audioUrl
       });
+
+      if(playing) {
+        audioEl.addEventListener('canplay', () => {
+          audioEl.play();
+        }, {once: true});
+      }
+
       document.title = episodes[index].title;
     });
   }
@@ -250,11 +258,6 @@ export default class Player extends Component {
       audioEl.currentTime = position;
       this.setState({playing, autoplay});
       this.selectEpisode(index);
-      if(playing) {
-        audioEl.addEventListener('canplay', () => {
-          audioEl.play();
-        }, {once: true});
-      }
     } catch(e) {
       console.log('Invalid saved JSON');
       this.selectEpisode(0);

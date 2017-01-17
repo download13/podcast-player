@@ -35,7 +35,10 @@ app.get('/p/:podcast/list', (req, res, next) => {
 
   getEpisodes(feedUrl).then(
     episodes => res.send(episodes),
-    err => res.status(404).send('Feed not found')
+    err => {
+      console.error(err);
+      res.status(500).send('Error getting feed');
+    }
   );
 });
 

@@ -13,6 +13,7 @@ const feedburner = new AsyncCache({
     fp.on('readable', () => {
       let item;
       while(item = fp.read()) {
+        if(item.enclosures.length === 0) continue;
         episodes.unshift({
           size: parseInt(item.enclosures[0].length),
           index: episodes.length,
