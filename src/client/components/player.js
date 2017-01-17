@@ -3,8 +3,6 @@ import {getRemoteFile, getBlob} from '../common';
 import PodcastImage from './podcast-image';
 
 
-const podcastName = location.pathname.split('/')[2];
-
 export default class Player extends Component {
   constructor(props) {
     super(props);

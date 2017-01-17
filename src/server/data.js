@@ -4,7 +4,7 @@ const AsyncCache = require('async-cache');
 
 
 const feedburner = new AsyncCache({
-  max: 1,
+  max: 50,
   maxAge: 1000 * 60 * 5,
   load(feedUrl, cb) {
     const episodes = [];
