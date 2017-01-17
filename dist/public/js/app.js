@@ -633,6 +633,9 @@ var Player = function (_Component) {
       duration: 0,
       autoplay: true
     };
+
+    _this.keyListener = _this.keyListener.bind(_this);
+    _this.unloadListener = _this.unloadListener.bind(_this);
     return _this;
   }
 
@@ -661,16 +664,14 @@ var Player = function (_Component) {
         _this2.setState({ playing: !audioEl.paused });
       };
 
-      window.onbeforeunload = function () {
-        return _this2.save();
-      };
-
-      window.addEventListener('keyup', function (e) {
-        if (e.code === 'Space') {
-          e.preventDefault();
-          _this2.togglePlaying();
-        }
-      });
+      window.addEventListener('beforeunload', this.unloadListener);
+      window.addEventListener('keyup', this.keyListener);
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      window.removeEventListener('beforeunload', this.unloadListener);
+      window.removeEventListener('keyup', this.keyListener);
     }
   }, {
     key: 'render',
@@ -843,6 +844,19 @@ var Player = function (_Component) {
           )
         )
       );
+    }
+  }, {
+    key: 'keyListener',
+    value: function keyListener(e) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        this.togglePlaying();
+      }
+    }
+  }, {
+    key: 'unloadListener',
+    value: function unloadListener() {
+      this.save();
     }
   }, {
     key: 'previousEpisode',

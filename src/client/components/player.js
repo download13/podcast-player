@@ -17,6 +17,9 @@ export default class Player extends Component {
       duration: 0,
       autoplay: true
     };
+
+    this.keyListener = this.keyListener.bind(this);
+    this.unloadListener = this.unloadListener.bind(this);
   }
 
   componentDidMount() {
@@ -39,14 +42,13 @@ export default class Player extends Component {
       this.setState({playing: !audioEl.paused})
     };
 
-    window.onbeforeunload = () => this.save();
+    window.addEventListener('beforeunload', this.unloadListener);
+    window.addEventListener('keyup', this.keyListener);
+  }
 
-    window.addEventListener('keyup', e => {
-      if(e.code === 'Space') {
-        e.preventDefault();
-        this.togglePlaying();
-      }
-    });
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.unloadListener);
+    window.removeEventListener('keyup', this.keyListener);
   }
 
   render(props, {
@@ -134,6 +136,17 @@ export default class Player extends Component {
         </span>
       </div>
     </div>;
+  }
+
+  keyListener(e) {
+    if(e.code === 'Space') {
+      e.preventDefault();
+      this.togglePlaying();
+    }
+  }
+
+  unloadListener() {
+    this.save();
   }
 
   previousEpisode() {
