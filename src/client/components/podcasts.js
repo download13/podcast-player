@@ -1,8 +1,6 @@
 import {h, Component} from 'preact';
 
 
-// TODO Have a "continue listening" section
-
 export default class Podcasts extends Component {
   constructor(props) {
     super(props);
