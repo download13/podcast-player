@@ -27,6 +27,7 @@ export default class Player extends Component {
     this.keyListener = this.keyListener.bind(this);
     this.userActivity = this.userActivity.bind(this);
     this.unloadListener = this.unloadListener.bind(this);
+    this.visibilityChange = this.visibilityChange.bind(this);
     this.episodeEnded = this.episodeEnded.bind(this);
     this.audioPlayingChange = this.audioPlayingChange.bind(this);
     this.audioPositionChange = this.audioPositionChange.bind(this);
@@ -42,6 +43,8 @@ export default class Player extends Component {
     window.addEventListener('beforeunload', this.unloadListener);
     window.addEventListener('keyup', this.keyListener);
     window.addEventListener('mousemove', this.userActivity);
+    window.addEventListener('pointermove', this.userActivity);
+    window.addEventListener('visibilitychange', this.visibilityChange);
 
     this.saveInterval = setInterval(() => {
       if(this.state.actualPlaying) {
@@ -56,6 +59,8 @@ export default class Player extends Component {
     window.removeEventListener('beforeunload', this.unloadListener);
     window.removeEventListener('keyup', this.keyListener);
     window.removeEventListener('mousemove', this.userActivity);
+    window.removeEventListener('pointermove', this.userActivity);
+    window.removeEventListener('visibilitychange', this.visibilityChange);
   }
 
   render(props, {
@@ -182,6 +187,12 @@ export default class Player extends Component {
     }
 
     userActivity();
+  }
+
+  visibilityChange() {
+    if(document.visibilityState === 'visible') {
+      userActivity();
+    }
   }
 
   userActivity() {
