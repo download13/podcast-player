@@ -60,10 +60,6 @@ input[type=number]::-webkit-outer-spin-button {
   }
 }
 
-.audio {
-  display: none;
-}
-
 .podcast-image > img {
   width: 100%;
   vertical-align: bottom;

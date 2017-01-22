@@ -1,18 +1,31 @@
 import {h, Component} from 'preact';
 
 
-export default class Audio extends Component {
+export default class AudioComponent extends Component {
   constructor(props) {
     super(props);
+
+    this.el = new Audio()
+    this.el.preload = 'auto';
   }
 
   componentDidMount() {
     const {el} = this;
     const {
+      src,
+      playing,
+      position,
       onPositionChange,
       onDurationChange,
-      onPlayingChange
+      onPlayingChange,
+      onEnded
     } = this.props;
+
+    el.src = src;
+    el.currentTime = position || 0;
+    if(playing) {
+      playWhenReady(el);
+    }
 
     if(onPositionChange) {
       el.ontimeupdate = () => onPositionChange(el.currentTime);
@@ -26,28 +39,51 @@ export default class Audio extends Component {
       el.onplaying = el.onpause = () => onPlayingChange(!el.paused);
     }
 
-    audioEl.onplaying = audioEl.onpause = () => {
-      this.setState({playing: !audioEl.paused})
-    };
-  }
-
-  componentWillReceiveProps(newProps) {
-    const {el} = this;
-    const {playing, src} = newProps;
-
-    if(playing) {
-
+    if(onEnded) {
+      el.onended = () => onEnded();
     }
   }
 
+  componentWillReceiveProps({src, playing, position}) {
+    const {el, props} = this;
+
+    if(src && src !== props.src) {
+      try { el.pause(); } catch(e) { console.log('src change error', e) }
+
+      el.src = src;
+
+      if(playing) {
+        playWhenReady(el);
+      }
+    }
+
+    if(playing === (!props.playing)) {
+      if(el.paused) {
+        playWhenReady(el);
+      } else {
+        el.pause();
+      }
+    }
+
+    if(position != null && position !== props.position) {
+      el.currentTime = position;
+    }
+  }
+
+
+
   render(props, state) {
-    return <audio
-      class="audio"
-      ref={el => this.el = el}
-      preload="auto"
-      src={currentAudioUrl}
-      onPause={() => this.save()}
-      onEnded={() => this.episodeEnded()}
-    />;
+    return null;
+  }
+}
+
+
+function playWhenReady(audio) {
+  if(audio.readyState === audio.HAVE_ENOUGH_DATA) {
+    audio.play();
+  } else {
+    audio.addEventListener('canplay', () => {
+      audio.play();
+    }, {once: true});
   }
 }

@@ -137,7 +137,7 @@ function sendRemoteFile(req, res, url) {
     headers.Range = req.headers.range;
   }
 
-  request({url, headers})
+  const clientRequest = request({url, headers})
   .on('response', ({statusCode, headers}) => {
     res.status(statusCode);
     if(headers['content-type']) {
@@ -151,6 +151,9 @@ function sendRemoteFile(req, res, url) {
     }
   })
   .pipe(res, {end: true})
+  .on('end', () => {
+    clientRequest.req.socket.destroy();
+  })
   .on('error', err => {
     console.error('sendRemoteFile error');
     console.error(err);

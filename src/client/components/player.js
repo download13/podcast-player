@@ -1,6 +1,7 @@
 import {h, Component} from 'preact';
 import {getRemoteFile, getBlob} from '../common';
 import PodcastImage from './podcast-image';
+import Audio from './audio';
 import {storePlace, getPlace} from './sync';
 
 
@@ -14,17 +15,21 @@ export default class Player extends Component {
       episodes: [],
       index: 0,
       playing: false,
-      startFromPosition: 0,
-      displayPosition: 0,
+      actualPlaying: false,
+      playFromPosition: 0,
+      actualPosition: 0,
       duration: 0,
       autoplay: true
     };
 
+    this.lastUserActivity = 0;
+
     this.keyListener = this.keyListener.bind(this);
+    this.userActivity = this.userActivity.bind(this);
     this.unloadListener = this.unloadListener.bind(this);
     this.episodeEnded = this.episodeEnded.bind(this);
-    this.audioPaused = this.audioPaused.bind(this);
-    this.audioPositionUpdate = this.audioPositionUpdate.bind(this);
+    this.audioPlayingChange = this.audioPlayingChange.bind(this);
+    this.audioPositionChange = this.audioPositionChange.bind(this);
     this.audioDurationChange = this.audioDurationChange.bind(this);
   }
 
@@ -36,9 +41,10 @@ export default class Player extends Component {
 
     window.addEventListener('beforeunload', this.unloadListener);
     window.addEventListener('keyup', this.keyListener);
+    window.addEventListener('mousemove', this.userActivity);
 
     this.saveInterval = setInterval(() => {
-      if(this.state.playing) {
+      if(this.state.actualPlaying) {
         this.save();
       }
     }, 10 * 1000);
@@ -49,6 +55,7 @@ export default class Player extends Component {
 
     window.removeEventListener('beforeunload', this.unloadListener);
     window.removeEventListener('keyup', this.keyListener);
+    window.removeEventListener('mousemove', this.userActivity);
   }
 
   render(props, {
@@ -58,8 +65,10 @@ export default class Player extends Component {
     episodes,
     autoplay,
     playing,
-    displayPosition,
-    duration
+    actualPlaying,
+    actualPosition,
+    duration,
+    playFromPosition
   }) {
     const {title, imageUrl, audioUrl, status} = episodes[index] || {};
 
@@ -81,29 +90,28 @@ export default class Player extends Component {
         <h1 class="title">{title}</h1>
       </div>
       <PodcastImage src={currentImageUrl}/>
-      <audio
-        class="audio"
-        ref={el => this.audioEl = el}
-        preload="auto"
+      <Audio
         src={currentAudioUrl}
-        onTimeUpdate={this.audioPositionUpdate}
+        playing={playing}
+        position={playFromPosition}
+        onPositionChange={this.audioPositionChange}
         onDurationChange={this.audioDurationChange}
-        onPause={this.audioPaused}
+        onPlayingChange={this.audioPlayingChange}
         onEnded={this.episodeEnded}
-      ></audio>
+      />
       <div class="seek_scrub">
-        <button class="toggle-playing" onClick={() => this.togglePlaying()} title={playing ? 'Pause' : 'Play'}>
-          <span class={playing ? 'icon-pause' : 'icon-play'}></span>
+        <button class="toggle-playing" onClick={() => this.togglePlaying()} title={actualPlaying ? 'Pause' : 'Play'}>
+          <span class={actualPlaying ? 'icon-pause' : 'icon-play'}></span>
         </button>
         <input
           class="scrubber"
           type="range"
           min="0"
           max={Math.round(duration)}
-          value={Math.round(displayPosition)}
+          value={Math.round(actualPosition)}
           onInput={e => this.seekTo(parseInt(e.target.value))}
         />
-        <div class="time">{formatTime(displayPosition) + ' / ' + formatTime(duration)}</div>
+        <div class="time">{formatTime(actualPosition) + ' / ' + formatTime(duration)}</div>
       </div>
       <div class="seek">
         <button onClick={() => this.seekBackward(30)} title="Back 30 Seconds">
@@ -130,9 +138,6 @@ export default class Player extends Component {
         <button onClick={() => this.cacheEpisode()} title={downloadTitle}>
           <span class={downloadIcon}></span>
         </button>
-        <button onClick={() => this.loadRemotePlace()} title="Load Remote Place">
-          <span class="icon-download-cloud"></span>
-        </button>
       </div>
       <div class="options">
         <span>
@@ -143,24 +148,50 @@ export default class Player extends Component {
     </div>;
   }
 
-  audioPaused() {
-    const {podcast} = this.props;
-    this.save();
-    storePlace(podcast, localStorage.getItem(podcast + '_place'));
+  audioPlayingChange(playing) {
+    this.setState({actualPlaying: playing});
+
+    if(!playing) {
+      this.save();
+
+      const {podcast} = this.props;
+      storePlace(podcast, localStorage.getItem(podcast + '_place'));
+    }
   }
 
-  audioPositionUpdate(e) {
-    this.setState({displayPosition: e.target.currentTime});
+  audioPositionChange(position) {
+    this.setState({actualPosition: position});
   }
 
-  audioDurationChange(e) {
-    this.setState({duration: e.target.duration});
+  episodeEnded() {
+    const {index, episodes, autoplay} = this.state;
+
+    if(index < episodes.length - 1 && autoplay) {
+      this.selectEpisode(index + 1);
+    }
+  }
+
+  audioDurationChange(duration) {
+    this.setState({duration});
   }
 
   keyListener(e) {
     if(e.code === 'Space') {
       e.preventDefault();
       this.togglePlaying();
+    }
+
+    userActivity();
+  }
+
+  userActivity() {
+    const {playing, actualPlaying} = this.state;
+    if(!playing && !actualPlaying) {
+      const now = Date.now();
+      if(now - this.lastUserActivity > 60000) {
+        this.lastUserActivity = now;
+        this.loadRemotePlace();
+      }
     }
   }
 
@@ -195,9 +226,8 @@ export default class Player extends Component {
   }
 
   selectEpisode(index) {
-    const {audioEl} = this;
     const {podcast} = this.props;
-    const {episodes, currentImageUrl, currentAudioUrl, playing} = this.state;
+    const {episodes, currentImageUrl, currentAudioUrl} = this.state;
     const imageUrl = getImageUrl(podcast, index);
     const audioUrl = getAudioUrl(podcast, index);
 
@@ -222,48 +252,32 @@ export default class Player extends Component {
         currentAudioUrl: audioBlob ? URL.createObjectURL(audioBlob) : audioUrl
       });
 
-      audioEl.addEventListener('loadedmetadata', () => {
-        console.log('loadedmetadata');
-        this.seekTo(this.state.startFromPosition);
-
-        if(playing) {
-          if(audioEl.readyState === 3) {
-            audioEl.play();
-          } else {
-            audioEl.addEventListener('canplay', () => {
-              audioEl.play();
-            }, {once: true});
-          }
-        }
-      }, {once: true});
-
-      document.title = episodes[index].title;
+      if(episodes[index]) {
+        document.title = episodes[index].title;
+      }
     });
   }
 
   seekTo(position) {
-    this.audioEl.currentTime = position;
+    this.setState({playFromPosition: position});
   }
 
   seekBackward(seconds) {
-    this.audioEl.currentTime -= seconds;
+    const {actualPosition} = this.state;
+    this.setState({
+      playFromPosition: actualPosition - seconds
+    });
   }
 
   seekForward(seconds) {
-    this.audioEl.currentTime += seconds;
+    const {actualPosition} = this.state;
+    this.setState({
+      playFromPosition: actualPosition + seconds
+    });
   }
 
   togglePlaying() {
-    const {audioEl} = this;
-    const {playing} = this.state;
-
-    this.setState({playing: !playing});
-
-    if(playing) {
-      audioEl.pause();
-    } else {
-      audioEl.play();
-    }
+    this.setState({playing: !this.state.actualPlaying});
   }
 
   setAutoplay(autoplay) {
@@ -285,22 +299,14 @@ export default class Player extends Component {
     }
   }
 
-  episodeEnded() {
-    const {index, episodes, autoplay} = this.state;
-
-    if(index < episodes.length - 1 && autoplay) {
-      this.selectEpisode(index + 1);
-    }
-  }
-
   save() {
     const {podcast} = this.props;
-    const {index, playing, displayPosition, autoplay} = this.state;
+    const {index, actualPlaying, actualPosition, autoplay} = this.state;
 
     const data = JSON.stringify({
       index,
-      playing,
-      position: displayPosition,
+      playing: actualPlaying,
+      position: actualPosition,
       autoplay
     });
 
@@ -313,7 +319,7 @@ export default class Player extends Component {
     try {
       const {index, playing, position, autoplay} = JSON.parse(localStorage.getItem(podcast + '_place'));
       this.setState({
-        startFromPosition: position,
+        playFromPosition: position,
         playing,
         autoplay
       });
