@@ -1,3 +1,15 @@
+.syncbar {
+  display: flex;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #f92977;
+}
+
+.synbtn {
+  padding:
+}
+
 .podcasts {
   margin: 20px auto 0 auto;
   width: 100%;

@@ -1,7 +1,16 @@
-const express = require('express');
-const {getEpisodes, getEpisode} = require('./data');
-const request = require('request');
-const {getPodcasts, getPodcast} = require('./casts');
+import express from 'express';
+import request from 'request';
+import {getEpisodes, getEpisode} from './data';
+import {getPodcasts, getPodcast} from './casts';
+import {
+  createJWT,
+  jwtMw,
+  textBody,
+  storeAuthorization,
+  checkAuthorization,
+  storePlace,
+  getPlace
+} from './mw';
 
 
 const app = express();
@@ -12,6 +21,43 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+app.get('/sync', (req, res) => {
+  res.sendFile(__dirname + '/views/index.html');
+});
+
+app.post('/sync/create', (req, res) => {
+  res.type('text').send(createJWT());
+});
+
+app.post('/sync/authorize', jwtMw, (req, res) => {
+  const code = storeAuthorization(req.user.data);
+  res.type('text').send(code);
+});
+
+app.post('/sync/join', textBody, (req, res) => {
+  const uuid = checkAuthorization(req.body);
+  if(!uuid) {
+    return res.status(401).send('Invalid code');
+  }
+  res.type('text').send(createJWT(uuid));
+});
+
+app.post('/sync/store/:podcast', jwtMw, textBody, (req, res) => {
+  storePlace(req.user.data, req.params.podcast, req.body)
+  .then(() => res.send('Stored'));
+});
+
+app.get('/sync/get/:podcast', jwtMw, (req, res) => {
+  getPlace(req.user.data, req.params.podcast)
+  .then(blob => {
+    if(blob) {
+      res.type('text').send(blob);
+    } else {
+      res.status(404).send('No data stored')
+    }
+  });
+});
+
 app.get('/p/:podcast', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
@@ -20,14 +66,8 @@ app.get('/list', (req, res) => {
   res.send(getPodcasts());
 });
 
-app.get('/manifest.json', (req, res) => {
-  const {podcast} = req.params;
-  res.type('application/json').render('manifest');
-});
-
 app.get('/p/:podcast/list', (req, res, next) => {
-  const {podcast} = req.params;
-  const {feedUrl} = getPodcast(podcast);
+  const {feedUrl} = getPodcast(req.params.podcast);
 
   if(!feedUrl) {
     return res.status(404).send('Feed not found');

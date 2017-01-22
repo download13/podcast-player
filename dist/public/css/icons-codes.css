@@ -7,4 +7,5 @@
 .icon-download:before { content: '\e806'; } /* '' */
 .icon-ok:before { content: '\e807'; } /* '' */
 .icon-spin:before { content: '\e832'; } /* '' */
-.icon-podcast:before { content: '\f2ce'; } /* '' */
+.icon-menu:before { content: '\f0c9'; } /* '' */
+.icon-download-cloud:before { content: '\f0ed'; } /* '' */

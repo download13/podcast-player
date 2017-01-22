@@ -1,6 +1,7 @@
 import {h, Component} from 'preact';
 import {getRemoteFile, getBlob} from '../common';
 import PodcastImage from './podcast-image';
+import {storePlace, getPlace} from './sync';
 
 
 export default class Player extends Component {
@@ -13,40 +14,39 @@ export default class Player extends Component {
       episodes: [],
       index: 0,
       playing: false,
-      position: 0,
+      startFromPosition: 0,
+      displayPosition: 0,
       duration: 0,
       autoplay: true
     };
 
     this.keyListener = this.keyListener.bind(this);
     this.unloadListener = this.unloadListener.bind(this);
+    this.episodeEnded = this.episodeEnded.bind(this);
+    this.audioPaused = this.audioPaused.bind(this);
+    this.audioPositionUpdate = this.audioPositionUpdate.bind(this);
+    this.audioDurationChange = this.audioDurationChange.bind(this);
   }
 
   componentDidMount() {
-    const {audioEl} = this;
-
     getEpisodes(this.props.podcast).then(episodes => {
       this.setState({episodes});
       this.load();
     });
 
-    audioEl.ontimeupdate = () => {
-      this.setState({position: audioEl.currentTime});
-    };
-
-    audioEl.ondurationchange = () => {
-      this.setState({duration: audioEl.duration});
-    };
-
-    audioEl.onplaying = audioEl.onpause = () => {
-      this.setState({playing: !audioEl.paused})
-    };
-
     window.addEventListener('beforeunload', this.unloadListener);
     window.addEventListener('keyup', this.keyListener);
+
+    this.saveInterval = setInterval(() => {
+      if(this.state.playing) {
+        this.save();
+      }
+    }, 10 * 1000);
   }
 
   componentWillUnmount() {
+    clearInterval(this.saveInterval);
+
     window.removeEventListener('beforeunload', this.unloadListener);
     window.removeEventListener('keyup', this.keyListener);
   }
@@ -58,13 +58,13 @@ export default class Player extends Component {
     episodes,
     autoplay,
     playing,
-    position,
+    displayPosition,
     duration
   }) {
     const {title, imageUrl, audioUrl, status} = episodes[index] || {};
 
     let downloadIcon = 'icon-download';
-    let downloadTitle = 'Download Episode';
+    let downloadTitle = 'Download for Offline Listening';
     if(status === 'downloading') {
       downloadIcon = 'icon-spin';
       downloadTitle = 'Downloading...'
@@ -86,8 +86,10 @@ export default class Player extends Component {
         ref={el => this.audioEl = el}
         preload="auto"
         src={currentAudioUrl}
-        onPause={() => this.save()}
-        onEnded={() => this.episodeEnded()}
+        onTimeUpdate={this.audioPositionUpdate}
+        onDurationChange={this.audioDurationChange}
+        onPause={this.audioPaused}
+        onEnded={this.episodeEnded}
       ></audio>
       <div class="seek_scrub">
         <button class="toggle-playing" onClick={() => this.togglePlaying()} title={playing ? 'Pause' : 'Play'}>
@@ -98,10 +100,10 @@ export default class Player extends Component {
           type="range"
           min="0"
           max={Math.round(duration)}
-          value={Math.round(position)}
+          value={Math.round(displayPosition)}
           onInput={e => this.seekTo(parseInt(e.target.value))}
         />
-        <div class="time">{formatTime(position) + ' / ' + formatTime(duration)}</div>
+        <div class="time">{formatTime(displayPosition) + ' / ' + formatTime(duration)}</div>
       </div>
       <div class="seek">
         <button onClick={() => this.seekBackward(30)} title="Back 30 Seconds">
@@ -128,6 +130,9 @@ export default class Player extends Component {
         <button onClick={() => this.cacheEpisode()} title={downloadTitle}>
           <span class={downloadIcon}></span>
         </button>
+        <button onClick={() => this.loadRemotePlace()} title="Load Remote Place">
+          <span class="icon-download-cloud"></span>
+        </button>
       </div>
       <div class="options">
         <span>
@@ -138,6 +143,20 @@ export default class Player extends Component {
     </div>;
   }
 
+  audioPaused() {
+    const {podcast} = this.props;
+    this.save();
+    storePlace(podcast, localStorage.getItem(podcast + '_place'));
+  }
+
+  audioPositionUpdate(e) {
+    this.setState({displayPosition: e.target.currentTime});
+  }
+
+  audioDurationChange(e) {
+    this.setState({duration: e.target.duration});
+  }
+
   keyListener(e) {
     if(e.code === 'Space') {
       e.preventDefault();
@@ -146,7 +165,21 @@ export default class Player extends Component {
   }
 
   unloadListener() {
+    const {podcast} = this.props;
+
     this.save();
+    storePlace(podcast, localStorage.getItem(podcast + '_place'));
+  }
+
+  loadRemotePlace() {
+    const {podcast} = this.props;
+    getPlace(podcast)
+    .then(blob => {
+      if(blob) {
+        localStorage.setItem(podcast + '_place', blob);
+        this.load();
+      }
+    });
   }
 
   previousEpisode() {
@@ -189,11 +222,20 @@ export default class Player extends Component {
         currentAudioUrl: audioBlob ? URL.createObjectURL(audioBlob) : audioUrl
       });
 
-      if(playing) {
-        audioEl.addEventListener('canplay', () => {
-          audioEl.play();
-        }, {once: true});
-      }
+      audioEl.addEventListener('loadedmetadata', () => {
+        console.log('loadedmetadata');
+        this.seekTo(this.state.startFromPosition);
+
+        if(playing) {
+          if(audioEl.readyState === 3) {
+            audioEl.play();
+          } else {
+            audioEl.addEventListener('canplay', () => {
+              audioEl.play();
+            }, {once: true});
+          }
+        }
+      }, {once: true});
 
       document.title = episodes[index].title;
     });
@@ -213,11 +255,14 @@ export default class Player extends Component {
 
   togglePlaying() {
     const {audioEl} = this;
+    const {playing} = this.state;
 
-    if(audioEl.paused) {
-      audioEl.play();
-    } else {
+    this.setState({playing: !playing});
+
+    if(playing) {
       audioEl.pause();
+    } else {
+      audioEl.play();
     }
   }
 
@@ -250,12 +295,12 @@ export default class Player extends Component {
 
   save() {
     const {podcast} = this.props;
-    const {index, playing, position, autoplay} = this.state;
+    const {index, playing, displayPosition, autoplay} = this.state;
 
     const data = JSON.stringify({
       index,
       playing,
-      position,
+      position: displayPosition,
       autoplay
     });
 
@@ -263,13 +308,15 @@ export default class Player extends Component {
   }
 
   load() {
-    const {audioEl} = this;
     const {podcast} = this.props;
-    let place;
+
     try {
       const {index, playing, position, autoplay} = JSON.parse(localStorage.getItem(podcast + '_place'));
-      audioEl.currentTime = position;
-      this.setState({playing, autoplay});
+      this.setState({
+        startFromPosition: position,
+        playing,
+        autoplay
+      });
       this.selectEpisode(index);
     } catch(e) {
       console.log('Invalid saved JSON');

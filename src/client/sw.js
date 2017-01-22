@@ -12,11 +12,13 @@ const precacheNetworkFirst = networkFirst('precache');
 
 const precachePaths = [
   '/',
+  '/sync',
   '/css/common.css',
   '/css/icons-codes.css',
   '/css/icons.woff',
   '/css/index.css',
   '/css/player.css',
+  '/css/sync.css',
   '/images/podcast_300.png',
   '/js/app.js',
   '/list'

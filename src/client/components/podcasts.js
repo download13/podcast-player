@@ -18,8 +18,13 @@ export default class Podcasts extends Component {
   }
 
   render(props, {podcasts}) {
-    return <div class="podcasts">
-      {podcasts.map(podcast => <Podcast podcast={podcast}/>)}
+    return <div>
+      <div class="syncbar">
+        <a class="syncbtn button" href="/sync">Sync</a>
+      </div>
+      <div class="podcasts">
+        {podcasts.map(podcast => <Podcast podcast={podcast}/>)}
+      </div>
     </div>;
   }
 }

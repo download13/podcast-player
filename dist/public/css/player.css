@@ -8,6 +8,14 @@ button, .button {
   outline: 0;
 }
 
+a.button {
+  display: flex;
+  align-items: center;
+  cursor: default;
+  text-decoration: none;
+  padding: 0 15px;
+}
+
 button:hover, .button:hover {
   background-color: #e22a6f;
 }
