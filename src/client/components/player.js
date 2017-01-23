@@ -186,12 +186,12 @@ export default class Player extends Component {
       this.togglePlaying();
     }
 
-    userActivity();
+    this.userActivity();
   }
 
   visibilityChange() {
     if(document.visibilityState === 'visible') {
-      userActivity();
+      this.userActivity();
     }
   }
 
