@@ -22,7 +22,11 @@ export default class AudioComponent extends Component {
     } = this.props;
 
     el.src = src;
-    el.currentTime = position || 0;
+
+    if(position) {
+      seekWhenReady(el, position);
+    }
+
     if(playing) {
       playWhenReady(el);
     }
@@ -66,7 +70,7 @@ export default class AudioComponent extends Component {
     }
 
     if(position != null && position !== props.position) {
-      el.currentTime = position;
+      seekWhenReady(el, position);
     }
   }
 
@@ -79,11 +83,21 @@ export default class AudioComponent extends Component {
 
 
 function playWhenReady(audio) {
-  if(audio.readyState === audio.HAVE_ENOUGH_DATA) {
-    audio.play();
-  } else {
-    audio.addEventListener('canplay', () => {
-      audio.play();
-    }, {once: true});
-  }
+  whenAudioReady(audio).then(() => audio.play());
+}
+
+function seekWhenReady(audio, position) {
+  whenAudioReady(audio).then(() => audio.currentTime = position);
+}
+
+function whenAudioReady(audio) {
+  return new Promise((resolve, reject) => {
+    if(audio.readyState === audio.HAVE_ENOUGH_DATA) {
+      resolve();
+    } else {
+      audio.addEventListener('canplay', () => {
+        resolve();
+      }, {once: true});
+    }
+  });
 }
