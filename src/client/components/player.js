@@ -219,8 +219,8 @@ export default class Player extends Component {
     .then(blob => {
       if(blob) {
         localStorage.setItem(podcast + '_place', blob);
-        this.load();
       }
+      this.load();
     });
   }
 
@@ -270,20 +270,27 @@ export default class Player extends Component {
   }
 
   seekTo(position) {
-    this.setState({playFromPosition: position});
+    this.setState({
+      playFromPosition: position,
+      actualPosition: position
+    });
   }
 
   seekBackward(seconds) {
     const {actualPosition} = this.state;
+    const newPosition = actualPosition - seconds;
     this.setState({
-      playFromPosition: actualPosition - seconds
+      playFromPosition: newPosition,
+      actualPosition: newPosition
     });
   }
 
   seekForward(seconds) {
     const {actualPosition} = this.state;
+    const newPosition = actualPosition + seconds;
     this.setState({
-      playFromPosition: actualPosition + seconds
+      playFromPosition: newPosition,
+      actualPosition: newPosition
     });
   }
 

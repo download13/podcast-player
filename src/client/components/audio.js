@@ -95,7 +95,7 @@ function whenAudioReady(audio) {
     if(audio.readyState === audio.HAVE_ENOUGH_DATA) {
       resolve();
     } else {
-      audio.addEventListener('canplay', () => {
+      audio.addEventListener('canplaythrough', () => {
         resolve();
       }, {once: true});
     }
