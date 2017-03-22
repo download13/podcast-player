@@ -2,7 +2,7 @@ const FeedParser = require('feedparser');
 const request = require('request');
 const AsyncCache = require('async-cache');
 
-
+// TODO: Provide real urls to our server app, provide app urls to the client
 const feedburner = new AsyncCache({
   max: 50,
   maxAge: 1000 * 60 * 5,

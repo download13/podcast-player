@@ -6,7 +6,7 @@
     "start": "NODE_ENV=production node dist/server.js",
     "watch": "webpack -w",
     "build": "webpack -p",
-    "serve": "nodemon dist/server/index.js"
+    "serve": "nodemon dist/server.js"
   },
   "main": "dist/server.js",
   "dependencies": {

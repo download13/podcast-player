@@ -1,6 +1,12 @@
-const {getPodcast} = require('../casts');
-const {getEpisode, getEpisodes} = require('../data');
+const path = require('path');
+const {
+  getPodcast,
+  getEpisode,
+  getEpisodes
+} = require('../data');
 
+
+const ICONS_PATH = path.resolve(__dirname, '../podcast-icons');
 
 module.exports = app => {
   app.get('/p/', (req, res) => {
@@ -29,7 +35,7 @@ module.exports = app => {
 
   app.get('/p/:podcast/icon', (req, res) => {
     const {icon} = getPodcast(req.params.podcast);
-    res.sendFile(__dirname + '/podcast-icons/' + icon);
+    res.sendFile(path.join(ICONS_PATH, icon));
   });
 
   app.get('/p/:podcast/episodes/:index/image', (req, res) => {

@@ -1,5 +1,6 @@
+const path = require('path');
 const fs = require('fs');
-const expressJWT from require('express-jwt');
+const expressJWT = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
@@ -8,7 +9,7 @@ const uuid = require('uuid/v4');
 const authMap = new Map();
 const places = new Map();
 
-const secret = fs.readFileSync(__dirname + '/secret.txt', 'utf8').trim();
+const secret = fs.readFileSync(path.resolve(__dirname, '../secret.txt'), 'utf8').trim();
 
 const textBody = bodyParser.text();
 
