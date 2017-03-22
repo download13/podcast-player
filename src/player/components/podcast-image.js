@@ -1,5 +1,4 @@
 import {h, Component} from 'preact';
-import {getRemoteFile} from '../common';
 
 
 export default class PodcastImage extends Component {

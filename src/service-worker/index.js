@@ -2,13 +2,16 @@ import {
     on,
     cacheAll,
     createRouter,
-    networkFirst
+    cacheFirst
 } from 'swkit';
+import {handleAndCacheFile} from '../common/file-cache';
 
 
+// TODO: handleAndCacheFile for audio files
+// cache image files as well
 const router = createRouter();
 
-const precacheNetworkFirst = networkFirst('precache');
+const precache = cacheFirst('precache');
 
 const precachePaths = [
   '/',
@@ -25,14 +28,14 @@ const precachePaths = [
 ];
 
 precachePaths.forEach(path => {
-  router.get(path, precacheNetworkFirst);
+  router.get(path, precache);
 });
 
 router.get('/p/:podcast', (req, params) => {
-  return precacheNetworkFirst(new Request('/'), params);
+  return precache(new Request('/p/'), params);
 });
-router.get('/p/:podcast/icon', precacheNetworkFirst);
-router.get('/p/:podcast/list', precacheNetworkFirst);
+router.get('/p/:podcast/icon', precache);
+router.get('/p/:podcast/list', precache);
 
 on('fetch', router.dispatch);
 

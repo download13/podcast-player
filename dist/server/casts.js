@@ -67,16 +67,19 @@ const casts = {
   }
 };
 
-const castArray = Object.keys(casts).map(n => {
-  const {name, humanName} = casts[n];
-  return {name, humanName};
-});
+const castArray = Object.keys(casts).map(n => casts[n]);
 
-export function getPodcasts() {
+function getPodcasts() {
   return castArray;
 }
 
-export function getPodcast(name) {
+function getPodcast(name) {
   if(!casts.hasOwnProperty(name)) name = 'mbmbam';
   return casts[name];
 }
+
+
+module.exports = {
+  getPodcasts,
+  getPodcast
+};

@@ -15,13 +15,13 @@ export default class AudioComponent extends Component {
       src,
       playing,
       position,
-      onPositionChange,
-      onDurationChange,
-      onPlayingChange,
-      onEnded
+      onStateChange,
+      onEnded,
+      volume
     } = this.props;
 
     el.src = src;
+    el.volume = volume;
 
     if(position) {
       seekWhenReady(el, position);
@@ -31,16 +31,14 @@ export default class AudioComponent extends Component {
       playWhenReady(el);
     }
 
-    if(onPositionChange) {
-      el.ontimeupdate = () => onPositionChange(el.currentTime);
-    }
+    if(onStateChange) {
+      const stateChange = () => {
+        onStateChange({position: el.currentTime, playing: !el.paused, duration: el.duration});
+      };
 
-    if(onDurationChange) {
-      el.ondurationchange = () => onDurationChange(el.duration);
-    }
-
-    if(onPlayingChange) {
-      el.onplaying = el.onpause = () => onPlayingChange(!el.paused);
+      el.ontimeupdate = stateChange;
+      el.ondurationchange = stateChange;
+      el.onplaying = stateChange;
     }
 
     if(onEnded) {
@@ -48,8 +46,12 @@ export default class AudioComponent extends Component {
     }
   }
 
-  componentWillReceiveProps({src, playing, position}) {
+  componentWillReceiveProps({src, playing, position, volume}) {
     const {el, props} = this;
+
+    if(volume !== el.volume) {
+      el.volume = volume;
+    }
 
     if(src && src !== props.src) {
       try { el.pause(); } catch(e) { console.log('src change error', e) }
@@ -73,8 +75,6 @@ export default class AudioComponent extends Component {
       seekWhenReady(el, position);
     }
   }
-
-
 
   render(props, state) {
     return null;

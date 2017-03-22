@@ -104,7 +104,7 @@ export default class SyncSettings extends Component {
   }
 }
 
-export function storePlace(podcastName, blob) {
+function storePlace(podcastName, blob) {
   const token = localStorage.getItem('authToken');
 
   if(token) {
@@ -119,7 +119,7 @@ export function storePlace(podcastName, blob) {
   }
 }
 
-export function getPlace(podcastName) {
+function getPlace(podcastName) {
   const token = localStorage.getItem('authToken');
 
   if(token) {

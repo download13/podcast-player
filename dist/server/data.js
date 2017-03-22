@@ -1,6 +1,6 @@
-import FeedParser from 'feedparser';
-import request from 'request';
-import AsyncCache from 'async-cache';
+const FeedParser = require('feedparser');
+const request = require('request');
+const AsyncCache = require('async-cache');
 
 
 const feedburner = new AsyncCache({
@@ -30,7 +30,7 @@ const feedburner = new AsyncCache({
   }
 });
 
-export function getEpisodes(feedUrl) {
+function getEpisodes(feedUrl) {
   return new Promise((resolve, reject) => {
     feedburner.get(feedUrl, (err, episodes) => {
       if(err) reject(err);
@@ -39,7 +39,13 @@ export function getEpisodes(feedUrl) {
   });
 }
 
-export function getEpisode(feedUrl, index) {
+function getEpisode(feedUrl, index) {
   return getEpisodes(feedUrl)
   .then(episodes => episodes[index]);
 }
+
+
+module.exports = {
+  getEpisodes,
+  getEpisode
+};

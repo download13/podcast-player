@@ -1,8 +1,8 @@
-import fs from 'fs';
-import expressJWT from 'express-jwt';
-import jwt from 'jsonwebtoken';
-import bodyParser from 'body-parser';
-import uuid from 'uuid/v4';
+const fs = require('fs');
+const expressJWT from require('express-jwt');
+const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
+const uuid = require('uuid/v4');
 
 
 const authMap = new Map();
@@ -10,17 +10,17 @@ const places = new Map();
 
 const secret = fs.readFileSync(__dirname + '/secret.txt', 'utf8').trim();
 
-export const textBody = bodyParser.text();
+const textBody = bodyParser.text();
 
-export const jwtMw = expressJWT({secret});
+const jwtMw = expressJWT({secret});
 
-export function createJWT(data) {
+function createJWT(data) {
   if(!data) data = uuid();
 
   return jwt.sign({data}, secret);
 }
 
-export function storeAuthorization(uuid) {
+function storeAuthorization(uuid) {
   const code = createRandomNumber();
   authMap.set(code, uuid);
   setTimeout(() => {
@@ -29,13 +29,13 @@ export function storeAuthorization(uuid) {
   return code;
 }
 
-export function checkAuthorization(code) {
+function checkAuthorization(code) {
   const uuid = authMap.get(code);
   authMap.delete(code);
   return uuid;
 }
 
-export function storePlace(profile, podcast, blob) {
+function storePlace(profile, podcast, blob) {
   if(!places.has(profile)) {
     places.set(profile, new Map());
   }
@@ -45,7 +45,7 @@ export function storePlace(profile, podcast, blob) {
   return Promise.resolve();
 }
 
-export function getPlace(profile, podcast) {
+function getPlace(profile, podcast) {
   const prof = places.get(profile);
 
   if(prof) {
@@ -58,3 +58,14 @@ export function getPlace(profile, podcast) {
 function createRandomNumber() {
   return Math.random().toString().substr(2, 8);
 }
+
+
+module.exports = {
+  textBody,
+  jwtMw,
+  createJWT,
+  storeAuthorization,
+  checkAuthorization,
+  storePlace,
+  getPlace
+};

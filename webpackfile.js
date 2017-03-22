@@ -1,80 +1,58 @@
+const babelJsxModule = {
+  rules: [
+    {
+      test: /\.js$/,
+      exclude: /node_modules/,
+      loader: 'babel-loader',
+      options: {
+        presets: [
+          ['babel-preset-es2015', {modules: false}]
+        ],
+        plugins: [
+          ['transform-react-jsx', {pragma: 'h'}],
+          'babel-plugin-transform-object-rest-spread'
+        ]
+      }
+    }
+  ]
+};
+
 module.exports = [
-  { // Client app
-    entry: './src/client/index.js',
+  { // /p/{podcast}
+    entry: './src/player/index.js',
     output: {
       path: './dist/public/js',
-      filename: 'app.js'
+      filename: 'player.js'
     },
-    module: {
-      loaders: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: 'babel-loader',
-          query: {
-            presets: [
-              ['babel-preset-es2015', {modules: false}]
-            ],
-            plugins: [
-              ['transform-react-jsx', {pragma: 'h'}],
-              'babel-plugin-transform-object-rest-spread'
-            ]
-          }
-        }
-      ]
-    }
+    module: babelJsxModule
+  },
+  { // /sync
+    entry: './src/sync/index.js',
+    output: {
+      path: './dist/public/js',
+      filename: 'sync.js'
+    },
+    module: babelJsxModule
   },
   { // Service-worker
-    entry: './src/client/sw.js',
+    entry: './src/service-worker/index.js',
     output: {
       path: './dist/public',
       filename: 'sw.js'
     },
     module: {
-      loaders: [
+      rules: [
         {
           test: /\.js$/,
           exclude: /node_modules/,
           loader: 'babel-loader',
-          query: {
+          options: {
             presets: [
               ['babel-preset-es2015', {modules: false}]
             ]
           }
         }
       ]
-    }
-  },
-  { // Server
-    entry: './src/server/index.js',
-    target: 'node',
-    node: {
-      __dirname: false
-    },
-    output: {
-      path: './dist',
-      filename: 'server.js'
-    },
-    module: {
-      loaders: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: 'babel-loader',
-          query: {
-            presets: [
-              ['babel-preset-es2015', {modules: false}]
-            ],
-            plugins: [
-              'babel-plugin-transform-object-rest-spread'
-            ]
-          }
-        }
-      ]
-    },
-    externals: {
-      'express': 'commonjs2 express',
-      'express-handlebars': 'commonjs2 express-handlebars',
     }
   }
 ];
