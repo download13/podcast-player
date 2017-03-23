@@ -1,7 +1,8 @@
-import {bootServiceWorker, createApp} from '../common';
+import {bootServiceWorker} from '../common';
+import {h, render} from 'preact';
 import SyncSettings from './sync-settings';
 
 
 bootServiceWorker();
 
-createApp(SyncSettings, document.getElementById('mount'));
+render(<SyncSettings/>, document.getElementById('mount'));

@@ -1,4 +1,5 @@
 const path = require('path');
+const request = require('request');
 const {
   getPodcast,
   getEpisode,
@@ -18,14 +19,14 @@ module.exports = app => {
   });
 
   app.get('/p/:podcast/list', (req, res, next) => {
-    const {feedUrl} = getPodcast(req.params.podcast);
+    getEpisodes(req.params.podcast).then(
+      episodes => {
+        if(!episodes) {
+          return res.status(404).send('Feed not found');
+        }
 
-    if(!feedUrl) {
-      return res.status(404).send('Feed not found');
-    }
-
-    getEpisodes(feedUrl).then(
-      episodes => res.send(episodes),
+        res.send(episodes);
+      },
       err => {
         console.error(err);
         res.status(500).send('Error getting feed');
@@ -40,9 +41,8 @@ module.exports = app => {
 
   app.get('/p/:podcast/episodes/:index/image', (req, res) => {
     const {podcast, index} = req.params;
-    const {feedUrl} = getPodcast(podcast);
 
-    getEpisode(feedUrl, index).then(
+    getEpisode(podcast, index).then(
       episode => {
         if(episode) {
           sendRemoteFile(req, res, episode.imageUrl);
@@ -59,9 +59,8 @@ module.exports = app => {
 
   app.get('/p/:podcast/episodes/:index/audio', (req, res) => {
     const {podcast, index} = req.params;
-    const {feedUrl} = getPodcast(podcast);
 
-    getEpisode(feedUrl, index).then(
+    getEpisode(podcast, index).then(
       episode => {
         if(episode) {
           sendRemoteFile(req, res, episode.audioUrl);
@@ -105,6 +104,7 @@ function sendRemoteFile(req, res, url) {
   .on('error', err => {
     console.error('sendRemoteFile error');
     console.error(err);
+    res.status(500);
     res.end();
   });
 }

@@ -7,6 +7,14 @@ export function loadEpisodes(store) {
   return fetch(`/p/${podcastName}/list`)
     .then(res => res.json())
     .then(episodes => {
+      episodes = episodes.map(episode => {
+        const episodeUrlPrefix = `${location.protocol}//${location.host}/p/${podcastName}/episodes/${episode.index}/`;
+        return {
+          ...episode,
+          imageUrl: episodeUrlPrefix + 'image',
+          audioUrl: episodeUrlPrefix + 'audio',
+        };
+      });
       store.dispatch({type: 'SET_EPISODES', payload: episodes});
     });
 }

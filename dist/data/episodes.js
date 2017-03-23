@@ -1,9 +1,11 @@
 const FeedParser = require('feedparser');
 const request = require('request');
 const AsyncCache = require('async-cache');
+const {getPodcast} = require('./podcasts-hardcoded');
+
 
 // TODO: Provide real urls to our server app, provide app urls to the client
-const feedburner = new AsyncCache({
+const feedCache = new AsyncCache({
   max: 50,
   maxAge: 1000 * 60 * 5,
   load(feedUrl, cb) {
@@ -30,18 +32,31 @@ const feedburner = new AsyncCache({
   }
 });
 
-function getEpisodes(feedUrl) {
+
+function getEpisodes(podcastName) {
   return new Promise((resolve, reject) => {
-    feedburner.get(feedUrl, (err, episodes) => {
+    const podcast = getPodcast(podcastName);
+
+    if(!podcast) {
+      return null;
+    }
+
+    feedCache.get(podcast.feedUrl, (err, episodes) => {
       if(err) reject(err);
       else resolve(episodes);
     });
   });
 }
 
-function getEpisode(feedUrl, index) {
-  return getEpisodes(feedUrl)
-  .then(episodes => episodes[index]);
+function getEpisode(podcastName, index) {
+  return getEpisodes(podcastName)
+    .then(episodes => {
+      if(episodes === null) {
+        return null;
+      }
+
+      return episodes[index];
+    });
 }
 
 

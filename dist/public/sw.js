@@ -514,7 +514,7 @@ var router = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_swkit__["createRo
 
 var precache = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_swkit__["cacheFirst"])('precache');
 
-var precachePaths = ['/', '/sync', '/css/common.css', '/css/icons-codes.css', '/css/icons.woff', '/css/index.css', '/css/player.css', '/css/sync.css', '/images/podcast_300.png', '/js/app.js', '/list'];
+var precachePaths = ['/', '/sync', '/css/common.css', '/css/icons-codes.css', '/css/icons.woff', '/css/index.css', '/css/player.css', '/css/sync.css', '/images/podcast_300.png', '/js/player.js', '/js/sync.js'];
 
 precachePaths.forEach(function (path) {
   router.get(path, precache);

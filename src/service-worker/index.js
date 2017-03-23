@@ -23,8 +23,8 @@ const precachePaths = [
   '/css/player.css',
   '/css/sync.css',
   '/images/podcast_300.png',
-  '/js/app.js',
-  '/list'
+  '/js/player.js',
+  '/js/sync.js'
 ];
 
 precachePaths.forEach(path => {
@@ -42,7 +42,7 @@ on('fetch', router.dispatch);
 on('install', e => {
   e.waitUntil(
     cacheAll('precache', precachePaths)
-    .then(skipWaiting())
+      .then(skipWaiting())
   );
 });
 

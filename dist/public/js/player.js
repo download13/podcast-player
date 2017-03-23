@@ -2902,6 +2902,8 @@ function playerKeyControls(store) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store_selectors__ = __webpack_require__(1);
 /* harmony export (immutable) */ __webpack_exports__["b"] = loadEpisodes;
 /* harmony export (immutable) */ __webpack_exports__["a"] = syncTitle;
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 
 
 function loadEpisodes(store) {
@@ -2911,6 +2913,13 @@ function loadEpisodes(store) {
   return fetch('/p/' + podcastName + '/list').then(function (res) {
     return res.json();
   }).then(function (episodes) {
+    episodes = episodes.map(function (episode) {
+      var episodeUrlPrefix = location.protocol + '//' + location.host + '/p/' + podcastName + '/episodes/' + episode.index + '/';
+      return _extends({}, episode, {
+        imageUrl: episodeUrlPrefix + 'image',
+        audioUrl: episodeUrlPrefix + 'audio'
+      });
+    });
     store.dispatch({ type: 'SET_EPISODES', payload: episodes });
   });
 }
@@ -4423,16 +4432,17 @@ module.exports = function(module) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_preact___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_preact__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact_redux__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact_redux___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_preact_redux__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__components_player__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__plugins_controls__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__plugins_storage__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__plugins_other__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__plugins_cache__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_preact__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_preact_redux__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_preact_redux___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_preact_redux__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__store__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__components_player__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__plugins_controls__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__plugins_storage__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__plugins_other__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__plugins_cache__ = __webpack_require__(14);
 
 
 
@@ -4442,32 +4452,41 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('/sw.js');
-}
 
-var store = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */])();
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__common__["a" /* bootServiceWorker */])();
+
+var store = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_3__store__["a" /* default */])();
 
 var podcastName = location.pathname.match(/^\/p\/([a-zA-Z0-9]+)$/)[1];
 store.dispatch({ type: 'SET_PODCAST_NAME', payload: podcastName });
 
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__plugins_storage__["a" /* syncStoreToStorage */])(store);
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__plugins_storage__["a" /* syncStoreToStorage */])(store);
 
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__plugins_controls__["a" /* playerKeyControls */])(store);
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_4__plugins_controls__["b" /* mediaSessionControls */])(store);
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__plugins_controls__["a" /* playerKeyControls */])(store);
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_5__plugins_controls__["b" /* mediaSessionControls */])(store);
 
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__plugins_other__["a" /* syncTitle */])(store);
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_6__plugins_other__["b" /* loadEpisodes */])(store);
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__plugins_other__["a" /* syncTitle */])(store);
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__plugins_other__["b" /* loadEpisodes */])(store);
 
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_7__plugins_cache__["a" /* keepEpisodesCached */])(store);
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_8__plugins_cache__["a" /* keepEpisodesCached */])(store);
 
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_preact__["render"])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_preact__["h"])(
-  __WEBPACK_IMPORTED_MODULE_1_preact_redux__["Provider"],
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["render"])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["h"])(
+  __WEBPACK_IMPORTED_MODULE_2_preact_redux__["Provider"],
   { store: store },
-  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_preact__["h"])(__WEBPACK_IMPORTED_MODULE_3__components_player__["a" /* default */], null)
+  __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["h"])(__WEBPACK_IMPORTED_MODULE_4__components_player__["a" /* default */], null)
 ), document.getElementById('mount'));
 
-window.store = store;
+/***/ }),
+/* 41 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = bootServiceWorker;
+function bootServiceWorker() {
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+}
 
 /***/ })
 /******/ ]);

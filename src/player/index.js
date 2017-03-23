@@ -1,3 +1,4 @@
+import {bootServiceWorker} from '../common';
 import {h, render} from 'preact';
 import {Provider} from 'preact-redux';
 import createStore from './store';
@@ -14,9 +15,7 @@ import {
 import {keepEpisodesCached} from './plugins/cache';
 
 
-if(navigator.serviceWorker) {
-  navigator.serviceWorker.register('/sw.js');
-}
+bootServiceWorker();
 
 
 const store = createStore();
@@ -40,6 +39,3 @@ render(
   </Provider>,
   document.getElementById('mount')
 );
-
-
-window.store = store;
