@@ -8,7 +8,9 @@ export default class PodcastImage extends Component {
   }
 
   componentWillReceiveProps(props) {
-    this.setState({src: props.src});
+    if(props.src !== this.state.src) {
+      this.setState({src: props.src});
+    }
   }
 
   render(props, {src}) {
