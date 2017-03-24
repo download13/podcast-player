@@ -10,6 +10,7 @@ const feedCache = new AsyncCache({
   maxAge: 1000 * 60 * 5,
   load(feedUrl, cb) {
     const episodes = [];
+    let index = 0;
 
     const fp = new FeedParser();
     fp.on('readable', () => {
@@ -18,12 +19,13 @@ const feedCache = new AsyncCache({
         if(item.enclosures.length === 0) continue;
         episodes.unshift({
           size: parseInt(item.enclosures[0].length),
-          index: episodes.length,
           title: item.title,
           imageUrl: item.image ? item.image.url : '',
           audioUrl: item.enclosures[0].url
         });
       }
+
+      episodes.forEach((episode, i) => episode.index = i);
     })
     .on('end', () => cb(null, episodes))
     .on('error', cb);

@@ -20,3 +20,13 @@ export function getNextEpisode(state, episode) {
 
   return getEpisode(state, nextIndex);
 }
+
+export function getPreviousEpisode(state, episode) {
+  const index = episode.index - 1;
+
+  if(index < 0) {
+    return null;
+  }
+
+  return getEpisode(state, index);
+}

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -73,7 +73,7 @@
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_range_parser__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_range_parser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_range_parser__);
-/* unused harmony export handleAndCacheFile */
+/* harmony export (immutable) */ __webpack_exports__["a"] = handleAndCacheFile;
 /* unused harmony export ensureFileCached */
 /* unused harmony export deleteCachedFile */
 /* unused harmony export deleteSelectedFiles */
@@ -129,11 +129,17 @@ function handleAndCacheFile(request) {
   });
 }
 
+var filesPending = {};
+
 function ensureFileCached(url) {
   var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
       onProgress = _ref.onProgress;
 
-  return ensureFileInfoCached(url).then(function (_ref2) {
+  if (filesPending[url]) {
+    return filesPending[url];
+  }
+
+  var pending = ensureFileInfoCached(url).then(function (_ref2) {
     var chunks = _ref2.chunks,
         size = _ref2.size;
 
@@ -159,7 +165,14 @@ function ensureFileCached(url) {
     };
 
     return nextChunk();
+  }).then(function (r) {
+    delete filesPending[url];
+    return r;
   });
+
+  filesPending[url] = pending;
+
+  return pending;
 }
 
 function deleteCachedFile(url) {
@@ -329,7 +342,1317 @@ function getChunkInfos(size, chunkSize) {
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-!function(t,n){ true?module.exports=n():"function"==typeof define&&define.amd?define([],n):"object"==typeof exports?exports.swkit=n():t.swkit=n()}(this,function(){return function(t){function n(r){if(e[r])return e[r].exports;var i=e[r]={i:r,l:!1,exports:{}};return t[r].call(i.exports,i,i.exports,n),i.l=!0,i.exports}var e={};return n.m=t,n.c=e,n.i=function(t){return t},n.d=function(t,e,r){n.o(t,e)||Object.defineProperty(t,e,{configurable:!1,enumerable:!0,get:r})},n.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return n.d(e,"a",e),e},n.o=function(t,n){return Object.prototype.hasOwnProperty.call(t,n)},n.p="",n(n.s=8)}([function(t,n,e){"use strict";function r(t){return function(n,e){return{displayName:t,props:n,children:e||[]}}}t.exports={Root:r("Root"),Concat:r("Concat"),Literal:r("Literal"),Splat:r("Splat"),Param:r("Param"),Optional:r("Optional")}},function(t,n,e){"use strict";function r(t){return i.forEach(function(n){if("undefined"==typeof t[n])throw new Error("No handler defined for "+n.displayName)}),{visit:function(t,n){return this.handlers[t.displayName].call(this,t,n)},handlers:t}}var i=Object.keys(e(0));t.exports=r},function(t,n,e){"use strict";var r=e(3);t.exports=r},function(t,n,e){"use strict";function r(t){var n;if(n=this?this:Object.create(r.prototype),"undefined"==typeof t)throw new Error("A route spec is required");return n.spec=t,n.ast=i.parse(t),n}var i=e(5),s=e(6),o=e(7);r.prototype=Object.create(null),r.prototype.match=function(t){var n=s.visit(this.ast),e=n.match(t);return!!e&&e},r.prototype.reverse=function(t){return o.visit(this.ast,t)},t.exports=r},function(t,n,e){var r=function(){function t(){this.yy={}}var n=function(t,n,e,r){for(e=e||{},r=t.length;r--;e[t[r]]=n);return e},e=[1,9],r=[1,10],i=[1,11],s=[1,12],o=[5,11,12,13,14,15],c={trace:function(){},yy:{},symbols_:{error:2,root:3,expressions:4,EOF:5,expression:6,optional:7,literal:8,splat:9,param:10,"(":11,")":12,LITERAL:13,SPLAT:14,PARAM:15,$accept:0,$end:1},terminals_:{2:"error",5:"EOF",11:"(",12:")",13:"LITERAL",14:"SPLAT",15:"PARAM"},productions_:[0,[3,2],[3,1],[4,2],[4,1],[6,1],[6,1],[6,1],[6,1],[7,3],[8,1],[9,1],[10,1]],performAction:function(t,n,e,r,i,s,o){var c=s.length-1;switch(i){case 1:return new r.Root({},[s[c-1]]);case 2:return new r.Root({},[new r.Literal({value:""})]);case 3:this.$=new r.Concat({},[s[c-1],s[c]]);break;case 4:case 5:this.$=s[c];break;case 6:this.$=new r.Literal({value:s[c]});break;case 7:this.$=new r.Splat({name:s[c]});break;case 8:this.$=new r.Param({name:s[c]});break;case 9:this.$=new r.Optional({},[s[c-1]]);break;case 10:this.$=t;break;case 11:case 12:this.$=t.slice(1)}},table:[{3:1,4:2,5:[1,3],6:4,7:5,8:6,9:7,10:8,11:e,13:r,14:i,15:s},{1:[3]},{5:[1,13],6:14,7:5,8:6,9:7,10:8,11:e,13:r,14:i,15:s},{1:[2,2]},n(o,[2,4]),n(o,[2,5]),n(o,[2,6]),n(o,[2,7]),n(o,[2,8]),{4:15,6:4,7:5,8:6,9:7,10:8,11:e,13:r,14:i,15:s},n(o,[2,10]),n(o,[2,11]),n(o,[2,12]),{1:[2,1]},n(o,[2,3]),{6:14,7:5,8:6,9:7,10:8,11:e,12:[1,16],13:r,14:i,15:s},n(o,[2,9])],defaultActions:{3:[2,2],13:[2,1]},parseError:function(t,n){function e(t,n){this.message=t,this.hash=n}if(!n.recoverable)throw e.prototype=Error,new e(t,n);this.trace(t)},parse:function(t){var n=this,e=[0],r=[null],i=[],s=this.table,o="",c=0,a=0,h=0,u=2,l=1,p=i.slice.call(arguments,1),f=Object.create(this.lexer),y={yy:{}};for(var d in this.yy)Object.prototype.hasOwnProperty.call(this.yy,d)&&(y.yy[d]=this.yy[d]);f.setInput(t,y.yy),y.yy.lexer=f,y.yy.parser=this,"undefined"==typeof f.yylloc&&(f.yylloc={});var m=f.yylloc;i.push(m);var g=f.options&&f.options.ranges;"function"==typeof y.yy.parseError?this.parseError=y.yy.parseError:this.parseError=Object.getPrototypeOf(this).parseError;for(var _,v,b,k,x,w,E,P,S,A=function(){var t;return t=f.lex()||l,"number"!=typeof t&&(t=n.symbols_[t]||t),t},I={};;){if(b=e[e.length-1],this.defaultActions[b]?k=this.defaultActions[b]:(null!==_&&"undefined"!=typeof _||(_=A()),k=s[b]&&s[b][_]),"undefined"==typeof k||!k.length||!k[0]){var L="";S=[];for(w in s[b])this.terminals_[w]&&w>u&&S.push("'"+this.terminals_[w]+"'");L=f.showPosition?"Parse error on line "+(c+1)+":\n"+f.showPosition()+"\nExpecting "+S.join(", ")+", got '"+(this.terminals_[_]||_)+"'":"Parse error on line "+(c+1)+": Unexpected "+(_==l?"end of input":"'"+(this.terminals_[_]||_)+"'"),this.parseError(L,{text:f.match,token:this.terminals_[_]||_,line:f.yylineno,loc:m,expected:S})}if(k[0]instanceof Array&&k.length>1)throw new Error("Parse Error: multiple actions possible at state: "+b+", token: "+_);switch(k[0]){case 1:e.push(_),r.push(f.yytext),i.push(f.yylloc),e.push(k[1]),_=null,v?(_=v,v=null):(a=f.yyleng,o=f.yytext,c=f.yylineno,m=f.yylloc,h>0&&h--);break;case 2:if(E=this.productions_[k[1]][1],I.$=r[r.length-E],I._$={first_line:i[i.length-(E||1)].first_line,last_line:i[i.length-1].last_line,first_column:i[i.length-(E||1)].first_column,last_column:i[i.length-1].last_column},g&&(I._$.range=[i[i.length-(E||1)].range[0],i[i.length-1].range[1]]),x=this.performAction.apply(I,[o,a,c,y.yy,k[1],r,i].concat(p)),"undefined"!=typeof x)return x;E&&(e=e.slice(0,-1*E*2),r=r.slice(0,-1*E),i=i.slice(0,-1*E)),e.push(this.productions_[k[1]][0]),r.push(I.$),i.push(I._$),P=s[e[e.length-2]][e[e.length-1]],e.push(P);break;case 3:return!0}}return!0}},a=function(){var t={EOF:1,parseError:function(t,n){if(!this.yy.parser)throw new Error(t);this.yy.parser.parseError(t,n)},setInput:function(t,n){return this.yy=n||this.yy||{},this._input=t,this._more=this._backtrack=this.done=!1,this.yylineno=this.yyleng=0,this.yytext=this.matched=this.match="",this.conditionStack=["INITIAL"],this.yylloc={first_line:1,first_column:0,last_line:1,last_column:0},this.options.ranges&&(this.yylloc.range=[0,0]),this.offset=0,this},input:function(){var t=this._input[0];this.yytext+=t,this.yyleng++,this.offset++,this.match+=t,this.matched+=t;var n=t.match(/(?:\r\n?|\n).*/g);return n?(this.yylineno++,this.yylloc.last_line++):this.yylloc.last_column++,this.options.ranges&&this.yylloc.range[1]++,this._input=this._input.slice(1),t},unput:function(t){var n=t.length,e=t.split(/(?:\r\n?|\n)/g);this._input=t+this._input,this.yytext=this.yytext.substr(0,this.yytext.length-n),this.offset-=n;var r=this.match.split(/(?:\r\n?|\n)/g);this.match=this.match.substr(0,this.match.length-1),this.matched=this.matched.substr(0,this.matched.length-1),e.length-1&&(this.yylineno-=e.length-1);var i=this.yylloc.range;return this.yylloc={first_line:this.yylloc.first_line,last_line:this.yylineno+1,first_column:this.yylloc.first_column,last_column:e?(e.length===r.length?this.yylloc.first_column:0)+r[r.length-e.length].length-e[0].length:this.yylloc.first_column-n},this.options.ranges&&(this.yylloc.range=[i[0],i[0]+this.yyleng-n]),this.yyleng=this.yytext.length,this},more:function(){return this._more=!0,this},reject:function(){return this.options.backtrack_lexer?(this._backtrack=!0,this):this.parseError("Lexical error on line "+(this.yylineno+1)+". You can only invoke reject() in the lexer when the lexer is of the backtracking persuasion (options.backtrack_lexer = true).\n"+this.showPosition(),{text:"",token:null,line:this.yylineno})},less:function(t){this.unput(this.match.slice(t))},pastInput:function(){var t=this.matched.substr(0,this.matched.length-this.match.length);return(t.length>20?"...":"")+t.substr(-20).replace(/\n/g,"")},upcomingInput:function(){var t=this.match;return t.length<20&&(t+=this._input.substr(0,20-t.length)),(t.substr(0,20)+(t.length>20?"...":"")).replace(/\n/g,"")},showPosition:function(){var t=this.pastInput(),n=new Array(t.length+1).join("-");return t+this.upcomingInput()+"\n"+n+"^"},test_match:function(t,n){var e,r,i;if(this.options.backtrack_lexer&&(i={yylineno:this.yylineno,yylloc:{first_line:this.yylloc.first_line,last_line:this.last_line,first_column:this.yylloc.first_column,last_column:this.yylloc.last_column},yytext:this.yytext,match:this.match,matches:this.matches,matched:this.matched,yyleng:this.yyleng,offset:this.offset,_more:this._more,_input:this._input,yy:this.yy,conditionStack:this.conditionStack.slice(0),done:this.done},this.options.ranges&&(i.yylloc.range=this.yylloc.range.slice(0))),r=t[0].match(/(?:\r\n?|\n).*/g),r&&(this.yylineno+=r.length),this.yylloc={first_line:this.yylloc.last_line,last_line:this.yylineno+1,first_column:this.yylloc.last_column,last_column:r?r[r.length-1].length-r[r.length-1].match(/\r?\n?/)[0].length:this.yylloc.last_column+t[0].length},this.yytext+=t[0],this.match+=t[0],this.matches=t,this.yyleng=this.yytext.length,this.options.ranges&&(this.yylloc.range=[this.offset,this.offset+=this.yyleng]),this._more=!1,this._backtrack=!1,this._input=this._input.slice(t[0].length),this.matched+=t[0],e=this.performAction.call(this,this.yy,this,n,this.conditionStack[this.conditionStack.length-1]),this.done&&this._input&&(this.done=!1),e)return e;if(this._backtrack){for(var s in i)this[s]=i[s];return!1}return!1},next:function(){if(this.done)return this.EOF;this._input||(this.done=!0);var t,n,e,r;this._more||(this.yytext="",this.match="");for(var i=this._currentRules(),s=0;s<i.length;s++)if(e=this._input.match(this.rules[i[s]]),e&&(!n||e[0].length>n[0].length)){if(n=e,r=s,this.options.backtrack_lexer){if(t=this.test_match(e,i[s]),t!==!1)return t;if(this._backtrack){n=!1;continue}return!1}if(!this.options.flex)break}return n?(t=this.test_match(n,i[r]),t!==!1&&t):""===this._input?this.EOF:this.parseError("Lexical error on line "+(this.yylineno+1)+". Unrecognized text.\n"+this.showPosition(),{text:"",token:null,line:this.yylineno})},lex:function(){var t=this.next();return t?t:this.lex()},begin:function(t){this.conditionStack.push(t)},popState:function(){var t=this.conditionStack.length-1;return t>0?this.conditionStack.pop():this.conditionStack[0]},_currentRules:function(){return this.conditionStack.length&&this.conditionStack[this.conditionStack.length-1]?this.conditions[this.conditionStack[this.conditionStack.length-1]].rules:this.conditions.INITIAL.rules},topState:function(t){return t=this.conditionStack.length-1-Math.abs(t||0),t>=0?this.conditionStack[t]:"INITIAL"},pushState:function(t){this.begin(t)},stateStackSize:function(){return this.conditionStack.length},options:{},performAction:function(t,n,e,r){switch(e){case 0:return"(";case 1:return")";case 2:return"SPLAT";case 3:return"PARAM";case 4:return"LITERAL";case 5:return"LITERAL";case 6:return"EOF"}},rules:[/^(?:\()/,/^(?:\))/,/^(?:\*+\w+)/,/^(?::+\w+)/,/^(?:[\w%\-~\n]+)/,/^(?:.)/,/^(?:$)/],conditions:{INITIAL:{rules:[0,1,2,3,4,5,6],inclusive:!0}}};return t}();return c.lexer=a,t.prototype=c,c.Parser=t,new t}();n.parser=r,n.Parser=r.Parser,n.parse=function(){return r.parse.apply(r,arguments)}},function(t,n,e){"use strict";var r=e(4).parser;r.yy=e(0),t.exports=r},function(t,n,e){"use strict";function r(t){this.captures=t.captures,this.re=t.re}var i=e(1),s=/[\-{}\[\]+?.,\\\^$|#\s]/g;r.prototype.match=function(t){var n=this.re.exec(t),e={};if(n)return this.captures.forEach(function(t,r){"undefined"==typeof n[r+1]?e[t]=void 0:e[t]=decodeURIComponent(n[r+1])}),e};var o=i({Concat:function(t){return t.children.reduce(function(t,n){var e=this.visit(n);return{re:t.re+e.re,captures:t.captures.concat(e.captures)}}.bind(this),{re:"",captures:[]})},Literal:function(t){return{re:t.props.value.replace(s,"\\$&"),captures:[]}},Splat:function(t){return{re:"([^?]*?)",captures:[t.props.name]}},Param:function(t){return{re:"([^\\/\\?]+)",captures:[t.props.name]}},Optional:function(t){var n=this.visit(t.children[0]);return{re:"(?:"+n.re+")?",captures:n.captures}},Root:function(t){var n=this.visit(t.children[0]);return new r({re:new RegExp("^"+n.re+"(?=\\?|$)"),captures:n.captures})}});t.exports=o},function(t,n,e){"use strict";var r=e(1),i=r({Concat:function(t,n){var e=t.children.map(function(t){return this.visit(t,n)}.bind(this));return!e.some(function(t){return t===!1})&&e.join("")},Literal:function(t){return decodeURI(t.props.value)},Splat:function(t,n){return!!n[t.props.name]&&n[t.props.name]},Param:function(t,n){return!!n[t.props.name]&&n[t.props.name]},Optional:function(t,n){var e=this.visit(t.children[0],n);return e?e:""},Root:function(t,n){n=n||{};var e=this.visit(t.children[0],n);return!!e&&encodeURI(e)}});t.exports=i},function(t,n,e){"use strict";function r(t,n){if(!(t instanceof n))throw new TypeError("Cannot call a class as a function")}function i(t,n,e){return addEventListener(t,n,e)}function s(t,n){return caches.open(t).then(function(t){return t.addAll(n)})}function o(t,n,e){return caches.open(t).then(function(t){return t.put(n,e)})}function c(t,n){return caches.open(t).then(function(t){return t.match(n)})}function a(t,n){var e=function e(r){return c(t[r],n).then(function(n){return n?n:r+1>=t.length?Promise.resolve(null):e(r+1)})};return e(0)}function h(t){return function(n,e){return p(n,t).catch(function(){return c(t,n)})}}function u(t){return function(n,e){return c(t,n).then(function(e){return e?(p(n,t),e):p(n,t)})}}function l(t){return function(n,e){return c(t,n).then(function(e){return e?e:p(n,t)})}}function p(t,n){return t=new Request(t.url,{method:t.method,headers:t.headers,mode:"same-origin"}),fetch(t,{headers:{"Cache-Control":"no-cache"}}).then(function(e){return o(n,t,e.clone()).then(function(){return e})})}function f(){return new g}Object.defineProperty(n,"__esModule",{value:!0});var y=e(2),d=e.n(y);n.on=i,n.cacheAll=s,n.put=o,n.matchCache=c,n.matchCaches=a,n.networkFirst=h,n.cacheFirst=u,n.ensureCached=l,n.createRouter=f;var m=function(){function t(t,n){for(var e=0;e<n.length;e++){var r=n[e];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r)}}return function(n,e,r){return e&&t(n.prototype,e),r&&t(n,r),n}}(),g=function(){function t(){r(this,t),this.routes=[],this.dispatch=this.dispatch.bind(this)}return m(t,[{key:"get",value:function(t,n){var e=new d.a(t);this.routes.push({route:e,handler:n})}},{key:"dispatch",value:function(t){var n=t.request,e=new URL(n.url);if(e.origin===location.origin)for(var r=0;r<this.routes.length;r++){var i=this.routes[r],s=i.route,o=i.handler,c=s.match(e.pathname);if(c){var a=o(n,c);if(a instanceof Response)return void t.respondWith(Promise.resolve(a));if(a instanceof Promise)return void t.respondWith(a);throw console.error("Error handling "+n.url),new Error("Invalid handler response. Must be instance of Response or Promise.")}}}}]),t}()}])});
+/* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+(function webpackUniversalModuleDefinition(root, factory) {
+  if (( false ? 'undefined' : _typeof(exports)) === 'object' && ( false ? 'undefined' : _typeof(module)) === 'object') module.exports = factory();else if (true) !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));else if ((typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) === 'object') exports["swkit"] = factory();else root["swkit"] = factory();
+})(this, function () {
+  return (/******/function (modules) {
+      // webpackBootstrap
+      /******/ // The module cache
+      /******/var installedModules = {};
+
+      /******/ // The require function
+      /******/function __webpack_require__(moduleId) {
+
+        /******/ // Check if module is in cache
+        /******/if (installedModules[moduleId])
+          /******/return installedModules[moduleId].exports;
+
+        /******/ // Create a new module (and put it into the cache)
+        /******/var module = installedModules[moduleId] = {
+          /******/i: moduleId,
+          /******/l: false,
+          /******/exports: {}
+          /******/ };
+
+        /******/ // Execute the module function
+        /******/modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+        /******/ // Flag the module as loaded
+        /******/module.l = true;
+
+        /******/ // Return the exports of the module
+        /******/return module.exports;
+        /******/
+      }
+
+      /******/ // expose the modules object (__webpack_modules__)
+      /******/__webpack_require__.m = modules;
+
+      /******/ // expose the module cache
+      /******/__webpack_require__.c = installedModules;
+
+      /******/ // identity function for calling harmony imports with the correct context
+      /******/__webpack_require__.i = function (value) {
+        return value;
+      };
+
+      /******/ // define getter function for harmony exports
+      /******/__webpack_require__.d = function (exports, name, getter) {
+        /******/if (!__webpack_require__.o(exports, name)) {
+          /******/Object.defineProperty(exports, name, {
+            /******/configurable: false,
+            /******/enumerable: true,
+            /******/get: getter
+            /******/ });
+          /******/
+        }
+        /******/
+      };
+
+      /******/ // getDefaultExport function for compatibility with non-harmony modules
+      /******/__webpack_require__.n = function (module) {
+        /******/var getter = module && module.__esModule ?
+        /******/function getDefault() {
+          return module['default'];
+        } :
+        /******/function getModuleExports() {
+          return module;
+        };
+        /******/__webpack_require__.d(getter, 'a', getter);
+        /******/return getter;
+        /******/
+      };
+
+      /******/ // Object.prototype.hasOwnProperty.call
+      /******/__webpack_require__.o = function (object, property) {
+        return Object.prototype.hasOwnProperty.call(object, property);
+      };
+
+      /******/ // __webpack_public_path__
+      /******/__webpack_require__.p = "";
+
+      /******/ // Load entry module and return exports
+      /******/return __webpack_require__(__webpack_require__.s = 8);
+      /******/
+    }(
+    /************************************************************************/
+    /******/[
+    /* 0 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+
+      /** @module route/nodes */
+
+      /**
+       * Create a node for use with the parser, giving it a constructor that takes
+       * props, children, and returns an object with props, children, and a
+       * displayName.
+       * @param  {String} displayName The display name for the node
+       * @return {{displayName: string, props: Object, children: Array}}
+       */
+
+      function createNode(displayName) {
+        return function (props, children) {
+          return {
+            displayName: displayName,
+            props: props,
+            children: children || []
+          };
+        };
+      }
+
+      module.exports = {
+        Root: createNode('Root'),
+        Concat: createNode('Concat'),
+        Literal: createNode('Literal'),
+        Splat: createNode('Splat'),
+        Param: createNode('Param'),
+        Optional: createNode('Optional')
+      };
+
+      /***/
+    },
+    /* 1 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+
+      /**
+       * @module route/visitors/create_visitor
+       */
+
+      var nodeTypes = Object.keys(__webpack_require__(0));
+
+      /**
+       * Helper for creating visitors. Take an object of node name to handler
+       * mappings, returns an object with a "visit" method that can be called
+       * @param  {Object.<string,function(node,context)>} handlers A mapping of node
+       * type to visitor functions
+       * @return {{visit: function(node,context)}}  A visitor object with a "visit"
+       * method that can be called on a node with a context
+       */
+      function createVisitor(handlers) {
+        nodeTypes.forEach(function (nodeType) {
+          if (typeof handlers[nodeType] === 'undefined') {
+            throw new Error('No handler defined for ' + nodeType.displayName);
+          }
+        });
+
+        return {
+          /**
+           * Call the given handler for this node type
+           * @param  {Object} node    the AST node
+           * @param  {Object} context context to pass through to handlers
+           * @return {Object}
+           */
+          visit: function visit(node, context) {
+            return this.handlers[node.displayName].call(this, node, context);
+          },
+          handlers: handlers
+        };
+      }
+
+      module.exports = createVisitor;
+
+      /***/
+    },
+    /* 2 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+      /**
+       * @module Passage
+       */
+
+      var Route = __webpack_require__(3);
+
+      module.exports = Route;
+
+      /***/
+    },
+    /* 3 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+
+      var Parser = __webpack_require__(5),
+          RegexpVisitor = __webpack_require__(6),
+          ReverseVisitor = __webpack_require__(7);
+
+      Route.prototype = Object.create(null);
+
+      /**
+       * Match a path against this route, returning the matched parameters if
+       * it matches, false if not.
+       * @example
+       * var route = new Route('/this/is/my/route')
+       * route.match('/this/is/my/route') // -> {}
+       * @example
+       * var route = new Route('/:one/:two')
+       * route.match('/foo/bar/') // -> {one: 'foo', two: 'bar'}
+       * @param  {string} path the path to match this route against
+       * @return {(Object.<string,string>|false)} A map of the matched route
+       * parameters, or false if matching failed
+       */
+      Route.prototype.match = function (path) {
+        var re = RegexpVisitor.visit(this.ast),
+            matched = re.match(path);
+
+        return matched ? matched : false;
+      };
+
+      /**
+       * Reverse a route specification to a path, returning false if it can't be
+       * fulfilled
+       * @example
+       * var route = new Route('/:one/:two')
+       * route.reverse({one: 'foo', two: 'bar'}) -> '/foo/bar'
+       * @param  {Object} params The parameters to fill in
+       * @return {(String|false)} The filled in path
+       */
+      Route.prototype.reverse = function (params) {
+        return ReverseVisitor.visit(this.ast, params);
+      };
+
+      /**
+       * Represents a route
+       * @example
+       * var route = Route('/:foo/:bar');
+       * @example
+       * var route = Route('/:foo/:bar');
+       * @param {string} spec -  the string specification of the route.
+       *     use :param for single portion captures, *param for splat style captures,
+       *     and () for optional route branches
+       * @constructor
+       */
+      function Route(spec) {
+        var route;
+        if (this) {
+          // constructor called with new
+          route = this;
+        } else {
+          // constructor called as a function
+          route = Object.create(Route.prototype);
+        }
+        if (typeof spec === 'undefined') {
+          throw new Error('A route spec is required');
+        }
+        route.spec = spec;
+        route.ast = Parser.parse(spec);
+        return route;
+      }
+
+      module.exports = Route;
+
+      /***/
+    },
+    /* 4 */
+    /***/function (module, exports, __webpack_require__) {
+
+      /* parser generated by jison 0.4.17 */
+      /*
+        Returns a Parser object of the following structure:
+      
+        Parser: {
+          yy: {}
+        }
+      
+        Parser.prototype: {
+          yy: {},
+          trace: function(),
+          symbols_: {associative list: name ==> number},
+          terminals_: {associative list: number ==> name},
+          productions_: [...],
+          performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate, $$, _$),
+          table: [...],
+          defaultActions: {...},
+          parseError: function(str, hash),
+          parse: function(input),
+      
+          lexer: {
+              EOF: 1,
+              parseError: function(str, hash),
+              setInput: function(input),
+              input: function(),
+              unput: function(str),
+              more: function(),
+              less: function(n),
+              pastInput: function(),
+              upcomingInput: function(),
+              showPosition: function(),
+              test_match: function(regex_match_array, rule_index),
+              next: function(),
+              lex: function(),
+              begin: function(condition),
+              popState: function(),
+              _currentRules: function(),
+              topState: function(),
+              pushState: function(condition),
+      
+              options: {
+                  ranges: boolean           (optional: true ==> token location info will include a .range[] member)
+                  flex: boolean             (optional: true ==> flex-like lexing behaviour where the rules are tested exhaustively to find the longest match)
+                  backtrack_lexer: boolean  (optional: true ==> lexer regexes are tested in order and for each matching regex the action code is invoked; the lexer terminates the scan when a token is returned by the action code)
+              },
+      
+              performAction: function(yy, yy_, $avoiding_name_collisions, YY_START),
+              rules: [...],
+              conditions: {associative list: name ==> set},
+          }
+        }
+      
+      
+        token location info (@$, _$, etc.): {
+          first_line: n,
+          last_line: n,
+          first_column: n,
+          last_column: n,
+          range: [start_number, end_number]       (where the numbers are indexes into the input string, regular zero-based)
+        }
+      
+      
+        the parseError function receives a 'hash' object with these members for lexer and parser errors: {
+          text:        (matched text)
+          token:       (the produced terminal token, if any)
+          line:        (yylineno)
+        }
+        while parser (grammar) errors will also provide these members, i.e. parser errors deliver a superset of attributes: {
+          loc:         (yylloc)
+          expected:    (string describing the set of expected tokens)
+          recoverable: (boolean: TRUE when the parser has a error recovery rule available for this particular error)
+        }
+      */
+      var parser = function () {
+        var o = function o(k, v, _o, l) {
+          for (_o = _o || {}, l = k.length; l--; _o[k[l]] = v) {}return _o;
+        },
+            $V0 = [1, 9],
+            $V1 = [1, 10],
+            $V2 = [1, 11],
+            $V3 = [1, 12],
+            $V4 = [5, 11, 12, 13, 14, 15];
+        var parser = { trace: function trace() {},
+          yy: {},
+          symbols_: { "error": 2, "root": 3, "expressions": 4, "EOF": 5, "expression": 6, "optional": 7, "literal": 8, "splat": 9, "param": 10, "(": 11, ")": 12, "LITERAL": 13, "SPLAT": 14, "PARAM": 15, "$accept": 0, "$end": 1 },
+          terminals_: { 2: "error", 5: "EOF", 11: "(", 12: ")", 13: "LITERAL", 14: "SPLAT", 15: "PARAM" },
+          productions_: [0, [3, 2], [3, 1], [4, 2], [4, 1], [6, 1], [6, 1], [6, 1], [6, 1], [7, 3], [8, 1], [9, 1], [10, 1]],
+          performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
+            /* this == yyval */
+
+            var $0 = $$.length - 1;
+            switch (yystate) {
+              case 1:
+                return new yy.Root({}, [$$[$0 - 1]]);
+                break;
+              case 2:
+                return new yy.Root({}, [new yy.Literal({ value: '' })]);
+                break;
+              case 3:
+                this.$ = new yy.Concat({}, [$$[$0 - 1], $$[$0]]);
+                break;
+              case 4:case 5:
+                this.$ = $$[$0];
+                break;
+              case 6:
+                this.$ = new yy.Literal({ value: $$[$0] });
+                break;
+              case 7:
+                this.$ = new yy.Splat({ name: $$[$0] });
+                break;
+              case 8:
+                this.$ = new yy.Param({ name: $$[$0] });
+                break;
+              case 9:
+                this.$ = new yy.Optional({}, [$$[$0 - 1]]);
+                break;
+              case 10:
+                this.$ = yytext;
+                break;
+              case 11:case 12:
+                this.$ = yytext.slice(1);
+                break;
+            }
+          },
+          table: [{ 3: 1, 4: 2, 5: [1, 3], 6: 4, 7: 5, 8: 6, 9: 7, 10: 8, 11: $V0, 13: $V1, 14: $V2, 15: $V3 }, { 1: [3] }, { 5: [1, 13], 6: 14, 7: 5, 8: 6, 9: 7, 10: 8, 11: $V0, 13: $V1, 14: $V2, 15: $V3 }, { 1: [2, 2] }, o($V4, [2, 4]), o($V4, [2, 5]), o($V4, [2, 6]), o($V4, [2, 7]), o($V4, [2, 8]), { 4: 15, 6: 4, 7: 5, 8: 6, 9: 7, 10: 8, 11: $V0, 13: $V1, 14: $V2, 15: $V3 }, o($V4, [2, 10]), o($V4, [2, 11]), o($V4, [2, 12]), { 1: [2, 1] }, o($V4, [2, 3]), { 6: 14, 7: 5, 8: 6, 9: 7, 10: 8, 11: $V0, 12: [1, 16], 13: $V1, 14: $V2, 15: $V3 }, o($V4, [2, 9])],
+          defaultActions: { 3: [2, 2], 13: [2, 1] },
+          parseError: function parseError(str, hash) {
+            if (hash.recoverable) {
+              this.trace(str);
+            } else {
+              var _parseError = function _parseError(msg, hash) {
+                this.message = msg;
+                this.hash = hash;
+              };
+
+              _parseError.prototype = Error;
+
+              throw new _parseError(str, hash);
+            }
+          },
+          parse: function parse(input) {
+            var self = this,
+                stack = [0],
+                tstack = [],
+                vstack = [null],
+                lstack = [],
+                table = this.table,
+                yytext = '',
+                yylineno = 0,
+                yyleng = 0,
+                recovering = 0,
+                TERROR = 2,
+                EOF = 1;
+            var args = lstack.slice.call(arguments, 1);
+            var lexer = Object.create(this.lexer);
+            var sharedState = { yy: {} };
+            for (var k in this.yy) {
+              if (Object.prototype.hasOwnProperty.call(this.yy, k)) {
+                sharedState.yy[k] = this.yy[k];
+              }
+            }
+            lexer.setInput(input, sharedState.yy);
+            sharedState.yy.lexer = lexer;
+            sharedState.yy.parser = this;
+            if (typeof lexer.yylloc == 'undefined') {
+              lexer.yylloc = {};
+            }
+            var yyloc = lexer.yylloc;
+            lstack.push(yyloc);
+            var ranges = lexer.options && lexer.options.ranges;
+            if (typeof sharedState.yy.parseError === 'function') {
+              this.parseError = sharedState.yy.parseError;
+            } else {
+              this.parseError = Object.getPrototypeOf(this).parseError;
+            }
+            function popStack(n) {
+              stack.length = stack.length - 2 * n;
+              vstack.length = vstack.length - n;
+              lstack.length = lstack.length - n;
+            }
+            _token_stack: var lex = function lex() {
+              var token;
+              token = lexer.lex() || EOF;
+              if (typeof token !== 'number') {
+                token = self.symbols_[token] || token;
+              }
+              return token;
+            };
+            var symbol,
+                preErrorSymbol,
+                state,
+                action,
+                a,
+                r,
+                yyval = {},
+                p,
+                len,
+                newState,
+                expected;
+            while (true) {
+              state = stack[stack.length - 1];
+              if (this.defaultActions[state]) {
+                action = this.defaultActions[state];
+              } else {
+                if (symbol === null || typeof symbol == 'undefined') {
+                  symbol = lex();
+                }
+                action = table[state] && table[state][symbol];
+              }
+              if (typeof action === 'undefined' || !action.length || !action[0]) {
+                var errStr = '';
+                expected = [];
+                for (p in table[state]) {
+                  if (this.terminals_[p] && p > TERROR) {
+                    expected.push('\'' + this.terminals_[p] + '\'');
+                  }
+                }
+                if (lexer.showPosition) {
+                  errStr = 'Parse error on line ' + (yylineno + 1) + ':\n' + lexer.showPosition() + '\nExpecting ' + expected.join(', ') + ', got \'' + (this.terminals_[symbol] || symbol) + '\'';
+                } else {
+                  errStr = 'Parse error on line ' + (yylineno + 1) + ': Unexpected ' + (symbol == EOF ? 'end of input' : '\'' + (this.terminals_[symbol] || symbol) + '\'');
+                }
+                this.parseError(errStr, {
+                  text: lexer.match,
+                  token: this.terminals_[symbol] || symbol,
+                  line: lexer.yylineno,
+                  loc: yyloc,
+                  expected: expected
+                });
+              }
+              if (action[0] instanceof Array && action.length > 1) {
+                throw new Error('Parse Error: multiple actions possible at state: ' + state + ', token: ' + symbol);
+              }
+              switch (action[0]) {
+                case 1:
+                  stack.push(symbol);
+                  vstack.push(lexer.yytext);
+                  lstack.push(lexer.yylloc);
+                  stack.push(action[1]);
+                  symbol = null;
+                  if (!preErrorSymbol) {
+                    yyleng = lexer.yyleng;
+                    yytext = lexer.yytext;
+                    yylineno = lexer.yylineno;
+                    yyloc = lexer.yylloc;
+                    if (recovering > 0) {
+                      recovering--;
+                    }
+                  } else {
+                    symbol = preErrorSymbol;
+                    preErrorSymbol = null;
+                  }
+                  break;
+                case 2:
+                  len = this.productions_[action[1]][1];
+                  yyval.$ = vstack[vstack.length - len];
+                  yyval._$ = {
+                    first_line: lstack[lstack.length - (len || 1)].first_line,
+                    last_line: lstack[lstack.length - 1].last_line,
+                    first_column: lstack[lstack.length - (len || 1)].first_column,
+                    last_column: lstack[lstack.length - 1].last_column
+                  };
+                  if (ranges) {
+                    yyval._$.range = [lstack[lstack.length - (len || 1)].range[0], lstack[lstack.length - 1].range[1]];
+                  }
+                  r = this.performAction.apply(yyval, [yytext, yyleng, yylineno, sharedState.yy, action[1], vstack, lstack].concat(args));
+                  if (typeof r !== 'undefined') {
+                    return r;
+                  }
+                  if (len) {
+                    stack = stack.slice(0, -1 * len * 2);
+                    vstack = vstack.slice(0, -1 * len);
+                    lstack = lstack.slice(0, -1 * len);
+                  }
+                  stack.push(this.productions_[action[1]][0]);
+                  vstack.push(yyval.$);
+                  lstack.push(yyval._$);
+                  newState = table[stack[stack.length - 2]][stack[stack.length - 1]];
+                  stack.push(newState);
+                  break;
+                case 3:
+                  return true;
+              }
+            }
+            return true;
+          } };
+        /* generated by jison-lex 0.3.4 */
+        var lexer = function () {
+          var lexer = {
+
+            EOF: 1,
+
+            parseError: function parseError(str, hash) {
+              if (this.yy.parser) {
+                this.yy.parser.parseError(str, hash);
+              } else {
+                throw new Error(str);
+              }
+            },
+
+            // resets the lexer, sets new input
+            setInput: function setInput(input, yy) {
+              this.yy = yy || this.yy || {};
+              this._input = input;
+              this._more = this._backtrack = this.done = false;
+              this.yylineno = this.yyleng = 0;
+              this.yytext = this.matched = this.match = '';
+              this.conditionStack = ['INITIAL'];
+              this.yylloc = {
+                first_line: 1,
+                first_column: 0,
+                last_line: 1,
+                last_column: 0
+              };
+              if (this.options.ranges) {
+                this.yylloc.range = [0, 0];
+              }
+              this.offset = 0;
+              return this;
+            },
+
+            // consumes and returns one char from the input
+            input: function input() {
+              var ch = this._input[0];
+              this.yytext += ch;
+              this.yyleng++;
+              this.offset++;
+              this.match += ch;
+              this.matched += ch;
+              var lines = ch.match(/(?:\r\n?|\n).*/g);
+              if (lines) {
+                this.yylineno++;
+                this.yylloc.last_line++;
+              } else {
+                this.yylloc.last_column++;
+              }
+              if (this.options.ranges) {
+                this.yylloc.range[1]++;
+              }
+
+              this._input = this._input.slice(1);
+              return ch;
+            },
+
+            // unshifts one char (or a string) into the input
+            unput: function unput(ch) {
+              var len = ch.length;
+              var lines = ch.split(/(?:\r\n?|\n)/g);
+
+              this._input = ch + this._input;
+              this.yytext = this.yytext.substr(0, this.yytext.length - len);
+              //this.yyleng -= len;
+              this.offset -= len;
+              var oldLines = this.match.split(/(?:\r\n?|\n)/g);
+              this.match = this.match.substr(0, this.match.length - 1);
+              this.matched = this.matched.substr(0, this.matched.length - 1);
+
+              if (lines.length - 1) {
+                this.yylineno -= lines.length - 1;
+              }
+              var r = this.yylloc.range;
+
+              this.yylloc = {
+                first_line: this.yylloc.first_line,
+                last_line: this.yylineno + 1,
+                first_column: this.yylloc.first_column,
+                last_column: lines ? (lines.length === oldLines.length ? this.yylloc.first_column : 0) + oldLines[oldLines.length - lines.length].length - lines[0].length : this.yylloc.first_column - len
+              };
+
+              if (this.options.ranges) {
+                this.yylloc.range = [r[0], r[0] + this.yyleng - len];
+              }
+              this.yyleng = this.yytext.length;
+              return this;
+            },
+
+            // When called from action, caches matched text and appends it on next action
+            more: function more() {
+              this._more = true;
+              return this;
+            },
+
+            // When called from action, signals the lexer that this rule fails to match the input, so the next matching rule (regex) should be tested instead.
+            reject: function reject() {
+              if (this.options.backtrack_lexer) {
+                this._backtrack = true;
+              } else {
+                return this.parseError('Lexical error on line ' + (this.yylineno + 1) + '. You can only invoke reject() in the lexer when the lexer is of the backtracking persuasion (options.backtrack_lexer = true).\n' + this.showPosition(), {
+                  text: "",
+                  token: null,
+                  line: this.yylineno
+                });
+              }
+              return this;
+            },
+
+            // retain first n characters of the match
+            less: function less(n) {
+              this.unput(this.match.slice(n));
+            },
+
+            // displays already matched input, i.e. for error messages
+            pastInput: function pastInput() {
+              var past = this.matched.substr(0, this.matched.length - this.match.length);
+              return (past.length > 20 ? '...' : '') + past.substr(-20).replace(/\n/g, "");
+            },
+
+            // displays upcoming input, i.e. for error messages
+            upcomingInput: function upcomingInput() {
+              var next = this.match;
+              if (next.length < 20) {
+                next += this._input.substr(0, 20 - next.length);
+              }
+              return (next.substr(0, 20) + (next.length > 20 ? '...' : '')).replace(/\n/g, "");
+            },
+
+            // displays the character position where the lexing error occurred, i.e. for error messages
+            showPosition: function showPosition() {
+              var pre = this.pastInput();
+              var c = new Array(pre.length + 1).join("-");
+              return pre + this.upcomingInput() + "\n" + c + "^";
+            },
+
+            // test the lexed token: return FALSE when not a match, otherwise return token
+            test_match: function test_match(match, indexed_rule) {
+              var token, lines, backup;
+
+              if (this.options.backtrack_lexer) {
+                // save context
+                backup = {
+                  yylineno: this.yylineno,
+                  yylloc: {
+                    first_line: this.yylloc.first_line,
+                    last_line: this.last_line,
+                    first_column: this.yylloc.first_column,
+                    last_column: this.yylloc.last_column
+                  },
+                  yytext: this.yytext,
+                  match: this.match,
+                  matches: this.matches,
+                  matched: this.matched,
+                  yyleng: this.yyleng,
+                  offset: this.offset,
+                  _more: this._more,
+                  _input: this._input,
+                  yy: this.yy,
+                  conditionStack: this.conditionStack.slice(0),
+                  done: this.done
+                };
+                if (this.options.ranges) {
+                  backup.yylloc.range = this.yylloc.range.slice(0);
+                }
+              }
+
+              lines = match[0].match(/(?:\r\n?|\n).*/g);
+              if (lines) {
+                this.yylineno += lines.length;
+              }
+              this.yylloc = {
+                first_line: this.yylloc.last_line,
+                last_line: this.yylineno + 1,
+                first_column: this.yylloc.last_column,
+                last_column: lines ? lines[lines.length - 1].length - lines[lines.length - 1].match(/\r?\n?/)[0].length : this.yylloc.last_column + match[0].length
+              };
+              this.yytext += match[0];
+              this.match += match[0];
+              this.matches = match;
+              this.yyleng = this.yytext.length;
+              if (this.options.ranges) {
+                this.yylloc.range = [this.offset, this.offset += this.yyleng];
+              }
+              this._more = false;
+              this._backtrack = false;
+              this._input = this._input.slice(match[0].length);
+              this.matched += match[0];
+              token = this.performAction.call(this, this.yy, this, indexed_rule, this.conditionStack[this.conditionStack.length - 1]);
+              if (this.done && this._input) {
+                this.done = false;
+              }
+              if (token) {
+                return token;
+              } else if (this._backtrack) {
+                // recover context
+                for (var k in backup) {
+                  this[k] = backup[k];
+                }
+                return false; // rule action called reject() implying the next rule should be tested instead.
+              }
+              return false;
+            },
+
+            // return next match in input
+            next: function next() {
+              if (this.done) {
+                return this.EOF;
+              }
+              if (!this._input) {
+                this.done = true;
+              }
+
+              var token, match, tempMatch, index;
+              if (!this._more) {
+                this.yytext = '';
+                this.match = '';
+              }
+              var rules = this._currentRules();
+              for (var i = 0; i < rules.length; i++) {
+                tempMatch = this._input.match(this.rules[rules[i]]);
+                if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
+                  match = tempMatch;
+                  index = i;
+                  if (this.options.backtrack_lexer) {
+                    token = this.test_match(tempMatch, rules[i]);
+                    if (token !== false) {
+                      return token;
+                    } else if (this._backtrack) {
+                      match = false;
+                      continue; // rule action called reject() implying a rule MISmatch.
+                    } else {
+                      // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
+                      return false;
+                    }
+                  } else if (!this.options.flex) {
+                    break;
+                  }
+                }
+              }
+              if (match) {
+                token = this.test_match(match, rules[index]);
+                if (token !== false) {
+                  return token;
+                }
+                // else: this is a lexer rule which consumes input without producing a token (e.g. whitespace)
+                return false;
+              }
+              if (this._input === "") {
+                return this.EOF;
+              } else {
+                return this.parseError('Lexical error on line ' + (this.yylineno + 1) + '. Unrecognized text.\n' + this.showPosition(), {
+                  text: "",
+                  token: null,
+                  line: this.yylineno
+                });
+              }
+            },
+
+            // return next match that has a token
+            lex: function lex() {
+              var r = this.next();
+              if (r) {
+                return r;
+              } else {
+                return this.lex();
+              }
+            },
+
+            // activates a new lexer condition state (pushes the new lexer condition state onto the condition stack)
+            begin: function begin(condition) {
+              this.conditionStack.push(condition);
+            },
+
+            // pop the previously active lexer condition state off the condition stack
+            popState: function popState() {
+              var n = this.conditionStack.length - 1;
+              if (n > 0) {
+                return this.conditionStack.pop();
+              } else {
+                return this.conditionStack[0];
+              }
+            },
+
+            // produce the lexer rule set which is active for the currently active lexer condition state
+            _currentRules: function _currentRules() {
+              if (this.conditionStack.length && this.conditionStack[this.conditionStack.length - 1]) {
+                return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
+              } else {
+                return this.conditions["INITIAL"].rules;
+              }
+            },
+
+            // return the currently active lexer condition state; when an index argument is provided it produces the N-th previous condition state, if available
+            topState: function topState(n) {
+              n = this.conditionStack.length - 1 - Math.abs(n || 0);
+              if (n >= 0) {
+                return this.conditionStack[n];
+              } else {
+                return "INITIAL";
+              }
+            },
+
+            // alias for begin(condition)
+            pushState: function pushState(condition) {
+              this.begin(condition);
+            },
+
+            // return the number of states currently on the stack
+            stateStackSize: function stateStackSize() {
+              return this.conditionStack.length;
+            },
+            options: {},
+            performAction: function anonymous(yy, yy_, $avoiding_name_collisions, YY_START) {
+              var YYSTATE = YY_START;
+              switch ($avoiding_name_collisions) {
+                case 0:
+                  return "(";
+                  break;
+                case 1:
+                  return ")";
+                  break;
+                case 2:
+                  return "SPLAT";
+                  break;
+                case 3:
+                  return "PARAM";
+                  break;
+                case 4:
+                  return "LITERAL";
+                  break;
+                case 5:
+                  return "LITERAL";
+                  break;
+                case 6:
+                  return "EOF";
+                  break;
+              }
+            },
+            rules: [/^(?:\()/, /^(?:\))/, /^(?:\*+\w+)/, /^(?::+\w+)/, /^(?:[\w%\-~\n]+)/, /^(?:.)/, /^(?:$)/],
+            conditions: { "INITIAL": { "rules": [0, 1, 2, 3, 4, 5, 6], "inclusive": true } }
+          };
+          return lexer;
+        }();
+        parser.lexer = lexer;
+        function Parser() {
+          this.yy = {};
+        }
+        Parser.prototype = parser;parser.Parser = Parser;
+        return new Parser();
+      }();
+
+      if (true) {
+        exports.parser = parser;
+        exports.Parser = parser.Parser;
+        exports.parse = function () {
+          return parser.parse.apply(parser, arguments);
+        };
+      }
+
+      /***/
+    },
+    /* 5 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+      /**
+       * @module route/parser
+       */
+
+      /** Wrap the compiled parser with the context to create node objects */
+
+      var parser = __webpack_require__(4).parser;
+      parser.yy = __webpack_require__(0);
+      module.exports = parser;
+
+      /***/
+    },
+    /* 6 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+
+      var createVisitor = __webpack_require__(1),
+          escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+      /**
+       * @class
+       * @private
+       */
+      function Matcher(options) {
+        this.captures = options.captures;
+        this.re = options.re;
+      }
+
+      /**
+       * Try matching a path against the generated regular expression
+       * @param  {String} path The path to try to match
+       * @return {Object|false}      matched parameters or false
+       */
+      Matcher.prototype.match = function (path) {
+        var match = this.re.exec(path),
+            matchParams = {};
+
+        if (!match) {
+          return;
+        }
+
+        this.captures.forEach(function (capture, i) {
+          if (typeof match[i + 1] === 'undefined') {
+            matchParams[capture] = undefined;
+          } else {
+            matchParams[capture] = decodeURIComponent(match[i + 1]);
+          }
+        });
+
+        return matchParams;
+      };
+
+      /**
+       * Visitor for the AST to create a regular expression matcher
+       * @class RegexpVisitor
+       * @borrows Visitor-visit
+       */
+      var RegexpVisitor = createVisitor({
+        'Concat': function Concat(node) {
+          return node.children.reduce(function (memo, child) {
+            var childResult = this.visit(child);
+            return {
+              re: memo.re + childResult.re,
+              captures: memo.captures.concat(childResult.captures)
+            };
+          }.bind(this), { re: '', captures: [] });
+        },
+        'Literal': function Literal(node) {
+          return {
+            re: node.props.value.replace(escapeRegExp, '\\$&'),
+            captures: []
+          };
+        },
+
+        'Splat': function Splat(node) {
+          return {
+            re: '([^?]*?)',
+            captures: [node.props.name]
+          };
+        },
+
+        'Param': function Param(node) {
+          return {
+            re: '([^\\/\\?]+)',
+            captures: [node.props.name]
+          };
+        },
+
+        'Optional': function Optional(node) {
+          var child = this.visit(node.children[0]);
+          return {
+            re: '(?:' + child.re + ')?',
+            captures: child.captures
+          };
+        },
+
+        'Root': function Root(node) {
+          var childResult = this.visit(node.children[0]);
+          return new Matcher({
+            re: new RegExp('^' + childResult.re + '(?=\\?|$)'),
+            captures: childResult.captures
+          });
+        }
+      });
+
+      module.exports = RegexpVisitor;
+
+      /***/
+    },
+    /* 7 */
+    /***/function (module, exports, __webpack_require__) {
+
+      "use strict";
+
+      var createVisitor = __webpack_require__(1);
+
+      /**
+       * Visitor for the AST to construct a path with filled in parameters
+       * @class ReverseVisitor
+       * @borrows Visitor-visit
+       */
+      var ReverseVisitor = createVisitor({
+        'Concat': function Concat(node, context) {
+          var childResults = node.children.map(function (child) {
+            return this.visit(child, context);
+          }.bind(this));
+
+          if (childResults.some(function (c) {
+            return c === false;
+          })) {
+            return false;
+          } else {
+            return childResults.join('');
+          }
+        },
+
+        'Literal': function Literal(node) {
+          return decodeURI(node.props.value);
+        },
+
+        'Splat': function Splat(node, context) {
+          if (context[node.props.name]) {
+            return context[node.props.name];
+          } else {
+            return false;
+          }
+        },
+
+        'Param': function Param(node, context) {
+          if (context[node.props.name]) {
+            return context[node.props.name];
+          } else {
+            return false;
+          }
+        },
+
+        'Optional': function Optional(node, context) {
+          var childResult = this.visit(node.children[0], context);
+          if (childResult) {
+            return childResult;
+          } else {
+            return '';
+          }
+        },
+
+        'Root': function Root(node, context) {
+          context = context || {};
+          var childResult = this.visit(node.children[0], context);
+          if (!childResult) {
+            return false;
+          }
+          return encodeURI(childResult);
+        }
+      });
+
+      module.exports = ReverseVisitor;
+
+      /***/
+    },
+    /* 8 */
+    /***/function (module, __webpack_exports__, __webpack_require__) {
+
+      "use strict";
+
+      Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+      /* harmony import */var __WEBPACK_IMPORTED_MODULE_0_route_parser__ = __webpack_require__(2);
+      /* harmony import */var __WEBPACK_IMPORTED_MODULE_0_route_parser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_route_parser__);
+      /* harmony export (immutable) */__webpack_exports__["on"] = on;
+      /* harmony export (immutable) */__webpack_exports__["cacheAll"] = cacheAll;
+      /* harmony export (immutable) */__webpack_exports__["put"] = put;
+      /* harmony export (immutable) */__webpack_exports__["matchCache"] = matchCache;
+      /* harmony export (immutable) */__webpack_exports__["matchCaches"] = matchCaches;
+      /* harmony export (immutable) */__webpack_exports__["networkFirst"] = networkFirst;
+      /* harmony export (immutable) */__webpack_exports__["cacheFirst"] = cacheFirst;
+      /* harmony export (immutable) */__webpack_exports__["ensureCached"] = ensureCached;
+      /* harmony export (immutable) */__webpack_exports__["createRouter"] = createRouter;
+      var _createClass = function () {
+        function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+          }
+        }return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+        };
+      }();
+
+      function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+          throw new TypeError("Cannot call a class as a function");
+        }
+      }
+
+      function on(eventName, handler, options) {
+        return addEventListener(eventName, handler, options);
+      }
+
+      function cacheAll(cacheName, urls) {
+        return caches.open(cacheName).then(function (cache) {
+          return cache.addAll(urls);
+        });
+      }
+
+      function put(cacheName, req, res) {
+        return caches.open(cacheName).then(function (cache) {
+          return cache.put(req, res);
+        });
+      }
+
+      function matchCache(cacheName, req) {
+        return caches.open(cacheName).then(function (cache) {
+          return cache.match(req);
+        });
+      }
+
+      function matchCaches(cacheNames, request) {
+        var tryMatch = function tryMatch(index) {
+          return matchCache(cacheNames[index], request).then(function (res) {
+            if (res) return res;
+            if (index + 1 >= cacheNames.length) return Promise.resolve(null);
+            return tryMatch(index + 1);
+          });
+        };
+
+        return tryMatch(0);
+      }
+
+      function networkFirst(cacheName) {
+        return function (request, params) {
+          return fetchAndStore(request, cacheName).catch(function () {
+            return matchCache(cacheName, request);
+          });
+        };
+      }
+
+      function cacheFirst(cacheName) {
+        return function (request, params) {
+          return matchCache(cacheName, request).then(function (res) {
+            if (res) {
+              fetchAndStore(request, cacheName).catch(function (err) {
+                return null;
+              });
+              return res;
+            } else {
+              return fetchAndStore(request, cacheName).catch(function (err) {
+                return null;
+              });
+            }
+          });
+        };
+      }
+
+      function ensureCached(cacheName) {
+        return function (request, params) {
+          return matchCache(cacheName, request).then(function (res) {
+            if (res) {
+              return res;
+            } else {
+              return fetchAndStore(request, cacheName).catch(function (err) {
+                return null;
+              });
+            }
+          });
+        };
+      }
+
+      function fetchAndStore(request, cacheName) {
+        request = new Request(request.url, {
+          method: request.method,
+          headers: request.headers,
+          mode: 'same-origin'
+        });
+
+        return fetch(request, {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        }).then(function (res) {
+          if (res.ok) {
+            return put(cacheName, request, res.clone()).then(function () {
+              return res;
+            });
+          }
+        });
+      }
+
+      function getHeaders(headers) {
+        var r = '';
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = headers.entries()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var entry = _step.value;
+
+            r += entry.toString() + '\n';
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        return r;
+      }
+
+      var Router = function () {
+        function Router() {
+          _classCallCheck(this, Router);
+
+          this.routes = [];
+
+          this.dispatch = this.dispatch.bind(this);
+        }
+
+        _createClass(Router, [{
+          key: 'get',
+          value: function get(path, handler) {
+            var route = new __WEBPACK_IMPORTED_MODULE_0_route_parser___default.a(path);
+            this.routes.push({ route: route, handler: handler });
+          }
+        }, {
+          key: 'dispatch',
+          value: function dispatch(e) {
+            var request = e.request;
+
+            var url = new URL(request.url);
+
+            if (url.origin === location.origin) {
+              for (var i = 0; i < this.routes.length; i++) {
+                var _routes$i = this.routes[i],
+                    route = _routes$i.route,
+                    handler = _routes$i.handler;
+
+                var params = route.match(url.pathname);
+                if (!params) continue;
+
+                var res = handler(request, params);
+                if (res instanceof Response) {
+                  e.respondWith(Promise.resolve(res));
+                  return;
+                } else if (res instanceof Promise) {
+                  e.respondWith(res);
+                  return;
+                } else {
+                  console.error('Error handling ' + request.url);
+                  throw new Error('Invalid handler response. Must be instance of Response or Promise.');
+                }
+              }
+            }
+          }
+        }]);
+
+        return Router;
+      }();
+
+      function createRouter() {
+        return new Router();
+      }
+
+      /***/
+    }])
+  );
+});
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
 
 /***/ }),
 /* 2 */
@@ -498,6 +1821,34 @@ function sortByRangeStart (a, b) {
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -523,8 +1874,12 @@ precachePaths.forEach(function (path) {
 router.get('/p/:podcast', function (req, params) {
   return precache(new Request('/p/'), params);
 });
+
 router.get('/p/:podcast/icon', precache);
 router.get('/p/:podcast/list', precache);
+
+router.get('/p/:podcast/episodes/:index/image', __WEBPACK_IMPORTED_MODULE_1__common_file_cache__["a" /* handleAndCacheFile */]);
+router.get('/p/:podcast/episodes/:index/audio', __WEBPACK_IMPORTED_MODULE_1__common_file_cache__["a" /* handleAndCacheFile */]);
 
 __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0_swkit__["on"])('fetch', router.dispatch);
 

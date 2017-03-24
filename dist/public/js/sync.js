@@ -63,12 +63,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ 0:
+/******/ ([
+/* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
 !function(global, factory) {
@@ -556,27 +555,7 @@
 //# sourceMappingURL=preact.js.map
 
 /***/ }),
-
-/***/ 27:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_preact__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__sync_settings__ = __webpack_require__(9);
-
-
-
-
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__common__["a" /* bootServiceWorker */])();
-
-__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["render"])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["h"])(__WEBPACK_IMPORTED_MODULE_2__sync_settings__["a" /* default */], null), document.getElementById('mount'));
-
-/***/ }),
-
-/***/ 8:
+/* 1 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -588,8 +567,7 @@ function bootServiceWorker() {
 }
 
 /***/ }),
-
-/***/ 9:
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -787,6 +765,23 @@ function okResponse(res) {
   return null;
 }
 
-/***/ })
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-/******/ });
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_preact___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_preact__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__sync_settings__ = __webpack_require__(2);
+
+
+
+
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__common__["a" /* bootServiceWorker */])();
+
+__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["render"])(__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1_preact__["h"])(__WEBPACK_IMPORTED_MODULE_2__sync_settings__["a" /* default */], null), document.getElementById('mount'));
+
+/***/ })
+/******/ ]);

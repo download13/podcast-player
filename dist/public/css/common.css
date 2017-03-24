@@ -9,3 +9,25 @@ html, body {
   padding: 0;
   margin: 0;
 }
+
+button, .button {
+  min-height: 48px;
+  font-size: 20px;
+  background-color: #f92977;
+  transition: background-color 100ms;
+  border: 0;
+  color: white;
+  outline: 0;
+}
+
+a.button {
+  display: flex;
+  align-items: center;
+  cursor: default;
+  text-decoration: none;
+  padding: 0 15px;
+}
+
+button:hover, .button:hover {
+  background-color: #e22a6f;
+}

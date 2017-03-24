@@ -29,20 +29,29 @@ export function handleAndCacheFile(request) {
       }
 
       return ensureFileRange(url, start, end)
-        .then(bodyStream => new Response(bodyStream, {
-          status: rangeRequest ? 206 : 200,
-          headers: {
-            'Accept-Ranges': 'bytes',
-            'Content-Range': `bytes ${start}-${end}/${size}`,
-            'Content-Length': end - start + 1,
-            'Content-Type': 'audio/ogg'
-          }
-        }));
+        .then(bodyStream => {
+            return new Response(bodyStream, {
+              status: rangeRequest ? 206 : 200,
+              headers: {
+                'Accept-Ranges': 'bytes',
+                'Content-Range': `bytes ${start}-${end}/${size}`,
+                'Content-Length': end - start + 1,
+                'Content-Type': 'audio/ogg'
+              }
+            });
+          });
     });
 }
 
+
+const filesPending = {};
+
 export function ensureFileCached(url, {onProgress} = {}) {
-  return ensureFileInfoCached(url)
+  if(filesPending[url]) {
+    return filesPending[url];
+  }
+
+  const pending = ensureFileInfoCached(url)
     .then(({chunks, size}) => {
       let progress = 0;
 
@@ -67,7 +76,15 @@ export function ensureFileCached(url, {onProgress} = {}) {
       };
 
       return nextChunk();
+    })
+    .then(r => {
+      delete filesPending[url];
+      return r;
     });
+
+  filesPending[url] = pending;
+
+  return pending;
 }
 
 export function deleteCachedFile(url) {

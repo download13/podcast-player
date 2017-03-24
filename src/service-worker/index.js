@@ -31,11 +31,13 @@ precachePaths.forEach(path => {
   router.get(path, precache);
 });
 
-router.get('/p/:podcast', (req, params) => {
-  return precache(new Request('/p/'), params);
-});
+router.get('/p/:podcast', (req, params) => precache(new Request('/p/'), params));
+
 router.get('/p/:podcast/icon', precache);
 router.get('/p/:podcast/list', precache);
+
+router.get('/p/:podcast/episodes/:index/image', handleAndCacheFile);
+router.get('/p/:podcast/episodes/:index/audio', handleAndCacheFile);
 
 on('fetch', router.dispatch);
 

@@ -2,7 +2,11 @@ import {
   ensureFileCached,
   deleteSelectedFiles
 } from '../../common/file-cache';
-import {getCurrentEpisode, getNextEpisode} from '../store/selectors';
+import {
+  getCurrentEpisode,
+  getNextEpisode,
+  getPreviousEpisode
+} from '../store/selectors';
 
 
 export function keepEpisodesCached(store) {
@@ -13,10 +17,11 @@ export function keepEpisodesCached(store) {
     const {podcastName} = state;
     const episode = getCurrentEpisode(state);
     const nextEpisode = getNextEpisode(state, episode);
+    const prevEpisode = getPreviousEpisode(state, episode);
 
     if(podcastName) {
       if(lastEpisode !== episode) {
-        const task = cleanupOtherEpisodes([episode, nextEpisode])
+        const task = cleanupOtherEpisodes([prevEpisode, episode, nextEpisode])
           .then(() => ensureEpisodeCached(episode));
 
         if(nextEpisode) {
@@ -30,12 +35,18 @@ export function keepEpisodesCached(store) {
 }
 
 function ensureEpisodeCached(episode) {
-  // console.log('trying ensure ' + index)
-  return ensureFileCached(episode.audioUrl);
+  return ensureFileCached(episode.imageUrl)
+    .then(() => ensureFileCached(episode.audioUrl));
 }
 
 function cleanupOtherEpisodes(episodes) {
   return deleteSelectedFiles(fileUrl => {
-    return episodes.every(episode => episode.audioUrl !== fileUrl);
+    return episodes.every(episode => {
+      if(episode) {
+        const {imageUrl, audioUrl} = episode;
+        return audioUrl !== fileUrl && imageUrl !== fileUrl;
+      }
+      return false;
+    });
   });
 }
