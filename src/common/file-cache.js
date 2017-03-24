@@ -159,7 +159,6 @@ function ensureFileInfoCached(url, chunkSize = DEFAULT_CHUNK_SIZE) {
       if(!exists) {
         return fetchFileInfo(url, chunkSize)
           .then(fileInfo => storeInCache(cacheName, FILE_INFO_PATH, JSON.stringify(fileInfo))
-          .then(r => console.log('storeInCache', r))
           .then(() => fileInfo));
       } else {
         return fetchFromCache(cacheName, FILE_INFO_PATH, 'json');
