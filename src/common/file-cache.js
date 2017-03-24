@@ -1,7 +1,7 @@
 import parseRange from 'range-parser';
 
 
-const DEFAULT_CHUNK_SIZE = 128 * 1024;
+const DEFAULT_CHUNK_SIZE = 256 * 1024;
 const CACHE_NAME_PREFIX = '_bs:';
 const CACHE_PATH_PREFIX = '/_bs/';
 const FILE_INFO_PATH = CACHE_PATH_PREFIX + 'info';
@@ -145,26 +145,49 @@ function ensureFileRange(url, start, end) {
 }
 
 
+const fileInfoPending = {};
+
 function ensureFileInfoCached(url, chunkSize = DEFAULT_CHUNK_SIZE) {
   const cacheName = CACHE_NAME_PREFIX + url;
 
-  return existsInCache(cacheName, FILE_INFO_PATH)
+  if(fileInfoPending[url]) {
+    return fileInfoPending[url];
+  }
+
+  const pending = existsInCache(cacheName, FILE_INFO_PATH)
     .then(exists => {
       if(!exists) {
         return fetchFileInfo(url, chunkSize)
           .then(fileInfo => storeInCache(cacheName, FILE_INFO_PATH, JSON.stringify(fileInfo))
-            .then(() => fileInfo));
+          .then(r => console.log('storeInCache', r))
+          .then(() => fileInfo));
       } else {
         return fetchFromCache(cacheName, FILE_INFO_PATH, 'json');
       }
+    })
+    .then(r => {
+      delete fileInfoPending[url];
+      return r;
     });
+
+  fileInfoPending[url] = pending;
+
+  return pending;
 }
+
+
+const chunksPending = {};
 
 function ensureChunkCached(url, chunkInfo) {
   const cacheName = CACHE_NAME_PREFIX + url;
   const cachePath = CACHE_PATH_PREFIX + `chunks/${chunkInfo.start}-${chunkInfo.end}`;
+  const pendingKey = url + ':' + chunkInfo.start + '-' + chunkInfo.end;
 
-  return existsInCache(cacheName, cachePath)
+  if(chunksPending[pendingKey]) {
+    return chunksPending[pendingKey];
+  }
+
+  const pending = existsInCache(cacheName, cachePath)
     .then(exists => {
       if(!exists) {
         return fetchChunk(url, chunkInfo)
@@ -172,7 +195,15 @@ function ensureChunkCached(url, chunkInfo) {
       } else {
         return fetchFromCache(cacheName, cachePath);
       }
+    })
+    .then(r => {
+      delete chunksPending[pendingKey];
+      return r;
     });
+
+  chunksPending[pendingKey] = pending;
+
+  return pending;
 }
 
 

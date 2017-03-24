@@ -3154,7 +3154,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 
 
-var DEFAULT_CHUNK_SIZE = 128 * 1024;
+var DEFAULT_CHUNK_SIZE = 256 * 1024;
 var CACHE_NAME_PREFIX = '_bs:';
 var CACHE_PATH_PREFIX = '/_bs/';
 var FILE_INFO_PATH = CACHE_PATH_PREFIX + 'info';
@@ -3310,29 +3310,51 @@ function ensureFileRange(url, start, end) {
   });
 }
 
+var fileInfoPending = {};
+
 function ensureFileInfoCached(url) {
   var chunkSize = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : DEFAULT_CHUNK_SIZE;
 
   var cacheName = CACHE_NAME_PREFIX + url;
 
-  return existsInCache(cacheName, FILE_INFO_PATH).then(function (exists) {
+  if (fileInfoPending[url]) {
+    return fileInfoPending[url];
+  }
+
+  var pending = existsInCache(cacheName, FILE_INFO_PATH).then(function (exists) {
     if (!exists) {
       return fetchFileInfo(url, chunkSize).then(function (fileInfo) {
-        return storeInCache(cacheName, FILE_INFO_PATH, JSON.stringify(fileInfo)).then(function () {
+        return storeInCache(cacheName, FILE_INFO_PATH, JSON.stringify(fileInfo)).then(function (r) {
+          return console.log('storeInCache', r);
+        }).then(function () {
           return fileInfo;
         });
       });
     } else {
       return fetchFromCache(cacheName, FILE_INFO_PATH, 'json');
     }
+  }).then(function (r) {
+    delete fileInfoPending[url];
+    return r;
   });
+
+  fileInfoPending[url] = pending;
+
+  return pending;
 }
+
+var chunksPending = {};
 
 function ensureChunkCached(url, chunkInfo) {
   var cacheName = CACHE_NAME_PREFIX + url;
   var cachePath = CACHE_PATH_PREFIX + ('chunks/' + chunkInfo.start + '-' + chunkInfo.end);
+  var pendingKey = url + ':' + chunkInfo.start + '-' + chunkInfo.end;
 
-  return existsInCache(cacheName, cachePath).then(function (exists) {
+  if (chunksPending[pendingKey]) {
+    return chunksPending[pendingKey];
+  }
+
+  var pending = existsInCache(cacheName, cachePath).then(function (exists) {
     if (!exists) {
       return fetchChunk(url, chunkInfo).then(function (chunkData) {
         return storeInCache(cacheName, cachePath, chunkData);
@@ -3340,7 +3362,14 @@ function ensureChunkCached(url, chunkInfo) {
     } else {
       return fetchFromCache(cacheName, cachePath);
     }
+  }).then(function (r) {
+    delete chunksPending[pendingKey];
+    return r;
   });
+
+  chunksPending[pendingKey] = pending;
+
+  return pending;
 }
 
 function existsInCache(cacheName, cachePath) {
