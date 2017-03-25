@@ -16,6 +16,7 @@ const initalPlayerState = {
   podcastName: '',
   episodes: [initialEpisodeInfo],
   index: 0,
+  selectedIndex: 0,
   playing: false,
   uiShowsPlaying: false,
   seekToPosition: 0, // was playFromPosition
@@ -36,23 +37,35 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
       return {...state, playing: !state.uiShowsPlaying};
     case 'CHANGE_PLAYING':
       return {...state, playing: payload};
-    case 'CHANGE_EPISODE':
+    case 'SELECT_EPISODE':
       if(payload >= 0 && payload < episodes.length) {
-        return {...state, index: payload};
+        return {...state, selectedIndex: payload};
       } else {
         return state;
       }
+    case 'FLUSH_SELECTED_EPISODE':
+      return {...state, index: state.selectedIndex};
+    case 'RESET_SELECTED_EPISODE':
+      return {...state, selectedIndex: index};
     case 'CHANGE_VOLUME':
       return {...state, volume: payload};
     case 'NEXT_EPISODE':
       if(index + 1 < episodes.length) {
-        return {...state, index: index + 1};
+        return {
+          ...state,
+          index: index + 1,
+          selectedIndex: index + 1
+        };
       } else {
         return state;
       }
     case 'PREVIOUS_EPISODE':
       if(index - 1 >= 0) {
-        return {...state, index: index - 1};
+        return {
+          ...state,
+          index: index - 1,
+          selectedIndex: index - 1
+        };
       } else {
         return state;
       }
@@ -103,6 +116,7 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
       }
       if(typeof restoreIndex === 'number') {
         add.index = restoreIndex;
+        add.selectedIndex = restoreIndex;
       }
       if(typeof volume === 'number') {
         add.volume = volume;

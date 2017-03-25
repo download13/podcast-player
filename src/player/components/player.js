@@ -11,6 +11,7 @@ import {getCurrentEpisode} from '../store/selectors';
 // TODO: Add volume control
 const Player = ({
   index,
+  selectedIndex,
   autoplay,
   playing,
   uiShowsPlaying,
@@ -32,7 +33,9 @@ const Player = ({
   seekBackward30,
   seekForward5,
   seekForward30,
-  selectEpisode
+  selectEpisode,
+  flushSelectedEpisode,
+  resetSelectedEpisode
 }) => {
   const {title, imageUrl, audioUrl, status} = episode;
 
@@ -84,7 +87,17 @@ const Player = ({
       <button onClick={previousEpisode} title="Previous Episode">
         <span class="icon-to-start-alt"></span>
       </button>
-      <input type="number" onInput={selectEpisode} value={index + 1}/>
+      <input
+        type="number"
+        onChange={selectEpisode}
+        onKeyUp={e => {
+          if(e.key === 'Enter') {
+            flushSelectedEpisode(e);
+          }
+        }}
+        onBlur={resetSelectedEpisode}
+        value={selectedIndex + 1}
+      />
       <button onClick={nextEpisode} title="Next Episode">
         <span class="icon-to-end-alt"></span>
       </button>
@@ -152,12 +165,20 @@ export default connect(
     seekForward30() {
       dispatch(seekRelative(30));
     },
-    selectEpisode: debounce(e => {
-      const index = parseInt(e.target.value);
-      if(typeof index === 'number' && !isNaN(index)) {
-        dispatch({type: 'CHANGE_EPISODE', payload: index});
+    selectEpisode(e) {
+      const episodeNumber = parseInt(e.target.value);
+      if(typeof episodeNumber === 'number' && !isNaN(episodeNumber)) {
+        console.log('selecting episode index:', episodeNumber)
+        dispatch({type: 'SELECT_EPISODE', payload: episodeNumber - 1});
       }
-    }, 2000),
+    },
+    resetSelectedEpisode() {
+      dispatch({type: 'RESET_SELECTED_EPISODE'});
+    },
+    flushSelectedEpisode(e) {
+      dispatch({type: 'FLUSH_SELECTED_EPISODE'});
+      e.target.blur();
+    },
     storeRemoteState() {
       // TODO:
       if(!playing) {

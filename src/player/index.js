@@ -31,7 +31,7 @@ mediaSessionControls(store);
 syncTitle(store);
 loadEpisodes(store);
 
-keepEpisodesCached(store);
+keepEpisodesCached(store); // TODO: Enable this later but controlled from a UI
 
 render(
   <Provider store={store}>
