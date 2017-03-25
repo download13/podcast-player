@@ -168,7 +168,6 @@ export default connect(
     selectEpisode(e) {
       const episodeNumber = parseInt(e.target.value);
       if(typeof episodeNumber === 'number' && !isNaN(episodeNumber)) {
-        console.log('selecting episode index:', episodeNumber)
         dispatch({type: 'SELECT_EPISODE', payload: episodeNumber - 1});
       }
     },
