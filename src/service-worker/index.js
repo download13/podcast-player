@@ -7,8 +7,6 @@ import {
 import {handleAndCacheFile} from '../common/file-cache';
 
 
-// TODO: handleAndCacheFile for audio files
-// cache image files as well
 const router = createRouter();
 
 const precache = cacheFirst('precache');
