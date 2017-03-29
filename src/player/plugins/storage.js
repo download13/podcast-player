@@ -1,76 +1,126 @@
-import {onIdleOrActive} from './idle';
+import {Observable, storeObservable} from './common';
+import {keepEpisodesCached} from './cache';
+import {
+  syncTitle,
+  playerKeyControls,
+  mediaSessionControls
+} from './browser';
 
 
 export function syncStoreToStorage(store) {
-  onIdleOrActive(
-    () => {
-      //console.log('active -> idle');
-    },
-    () => {
-      //console.log('idle -> active');
-      loadRemote(store);
-    }
-  );
+  const rawState$ = storeObservable(store);
 
-  addEventListener('beforeunload', e => {
-    saveLocal(store);
-  });
+  const state$ = rawState$
+    .distinctUntilChanged()
+    .share();
 
-  let lastPlaying = false;
-  let saveInterval;
-  let lastEpisodes;
+  const podcastName$ = state$
+    .pluck('podcastName')
+    .distinctUntilChanged()
+    .share();
 
-  store.subscribe(() => {
-    const {playing, episodes} = store.getState();
+  const episodes$ = state$
+    .pluck('episodes')
+    .distinctUntilChanged()
+    .share();
 
-    if(lastPlaying && !playing) {
-      clearInterval(saveInterval);
-      saveRemote(store);
-    } else if(!lastPlaying && playing) {
-      saveInterval = setInterval(() => saveLocal(store), 15000);
-    }
+  const bookmarks$ = state$
+    .pluck('bookmarks')
+    .distinctUntilChanged();
 
-    if(lastEpisodes !== episodes) {
-      saveEpisodes(store);
-    }
+  const throttledPosition$ = state$
+    .pluck('uiPosition')
+    .distinctUntilChanged()
+    .throttleTime(5000);
 
-    lastPlaying = playing;
-    lastEpisodes = episodes;
-  });
+  const paused$ = state$
+    .pluck('playing')
+    .distinctUntilChanged()
+    .filter(playing => !playing);
 
-  loadEpisodes(store);
-  loadRemote(store);
+  Observable.combineLatest(
+    state$,
+    throttledPosition$,
+    paused$,
+    Observable.fromEvent(window, 'beforeunload')
+  )
+    .subscribe(([state]) => savePlaceToStorage(state));
+
+  Observable.combineLatest(podcastName$, bookmarks$)
+    .subscribe(([podcastName, bookmarks]) => {
+      saveBookmarksToStorage(podcastName, bookmarks);
+      saveBookmarksToServer(podcastName, bookmarks);
+    });
+
+  Observable.combineLatest(podcastName$, episodes$)
+    .subscribe(([podcastName, episodes]) => saveEpisodesToStorage(podcastName, episodes));
+
+  const state = store.getState();
+
+  loadEpisodesFromServer(state.podcastName)
+    .then(() => {
+      loadEpisodesFromStorage(store);
+
+      //enumerateCachedEpisodes(); // TODO
+
+      loadPlaceFromStorage(store);
+    });
+
+  loadBookmarksFromServer(state.podcastName)
+    .then(() => loadBookmarksFromStorage(store));
+
+  syncTitle(state$);
+  mediaSessionControls(store, state$);
+  playerKeyControls(store);
+  keepEpisodesCached(store, rawState$, episodes$);
 }
 
 
-function saveRemote(store) {
-  saveLocal(store);
-
+function saveBookmarksToServer(podcastName, bookmarks) {
   const token = localStorage.getItem('authToken');
-  if(!token) return;
+  if(!token) {
+    return;
+  }
 
-  const {podcastName} = store.getState();
-
-  return fetch(`/sync/store/${podcastName}`, {
+  return fetch(`/sync/store/${podcastName}-bookmarks`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`
     },
-    body: getLocal(podcastName)
+    body: JSON.stringify(bookmarks)
   })
-    .then(res => res.ok);
+    .then(
+      res => res.ok,
+      err => {
+        console.error('saveBookmarksToServer error ' + podcastName);
+        console.error(err);
+        console.log(bookmarks);
+      }
+    );
 }
 
-function loadRemote(store) {
+
+// TODO: When episodes loaded, inventory all the cached episodes and set the cacheProgress for each episode
+function loadEpisodesFromServer(podcastName) {
+  return fetch(`/p/${podcastName}/list`)
+    .then(res => res.json())
+    .then(publicEpisodes.bind(null, podcastName))
+    .then(episodes => {
+      saveEpisodesToStorage(podcastName, episodes);
+    });
+}
+
+function loadBookmarksFromServer(podcastName) {
   const token = localStorage.getItem('authToken');
   if(!token) {
-    loadLocal(store);
-    return;
+    return Promise.resolve();
   };
 
-  const {podcastName} = store.getState();
+  return loadFromServer(podcastName, 'bookmarks')
+}
 
-  return fetch(`/sync/get/${podcastName}`, {
+function loadFromServer(podcastName, type) {
+  return fetch(`/sync/get/${podcastName}_${type}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -78,33 +128,26 @@ function loadRemote(store) {
     .then(
       blob => {
         if(blob) {
-          setLocal(podcastName, blob);
-          loadLocal(store);
+          setRaw(podcastName, type, blob);
         }
       },
-      err => loadLocal(store)
+      err => {
+        console.error('loadFromServer error ' + podcastName + '-' + type);
+        console.error(err);
+      }
     );
 }
 
 
-export function saveEpisodes(store) {
-  const {podcastName, episodes} = store.getState();
-
-  setEpisodes(podcastName, JSON.stringify(episodes));
+function saveEpisodesToStorage(podcastName, episodes) {
+  set(podcastName, 'episodes', episodes);
 }
 
-function loadEpisodes(store) {
-  const {podcastName} = store.getState();
-
-  try {
-    const episodes = JSON.parse(getEpisodes(podcastName));
-    store.dispatch({type: 'SET_EPISODES', payload: episodes});
-  } catch(e) {
-    console.log('Unable to load invalid saved JSON - episodes');
-  }
+function saveBookmarksToStorage(podcastName, bookmarks) {
+  set(podcastName, 'bookmarks', bookmarks);
 }
 
-function saveLocal(store) {
+function savePlaceToStorage(state) {
   const {
     podcastName,
     index,
@@ -112,43 +155,78 @@ function saveLocal(store) {
     uiPosition,
     autoplay,
     volume
-  } = store.getState();
+  } = state;
 
-  const blob = JSON.stringify({
+  set(podcastName, 'place', {
     index,
     playing,
     position: uiPosition,
     autoplay,
     volume
   });
-
-  setLocal(podcastName, blob);
 }
 
-function loadLocal(store) {
+
+function loadEpisodesFromStorage(store) {
   const {podcastName} = store.getState();
 
-  try {
-    const loadedState = JSON.parse(getLocal(podcastName));
-    store.dispatch({type: 'RESTORE_STATE', payload: loadedState});
-  } catch(e) {
-    console.log('Unable to load invalid saved JSON - place');
+  const episodes = get(podcastName, 'episodes');
+
+  store.dispatch({type: 'SET_EPISODES', payload: episodes});
+}
+
+function loadPlaceFromStorage(store) {
+  const {podcastName} = store.getState();
+
+  const loadedState = get(podcastName, 'place');
+
+  store.dispatch({type: 'RESTORE_STATE', payload: loadedState});
+}
+
+function loadBookmarksFromStorage(store) {
+  const {podcastName} = store.getState();
+
+  const bookmarks = get(podcastName, 'bookmarks');
+
+  store.dispatch({type: 'SET_BOOKMARKS', payload: bookmarks});
+}
+
+
+function get(podcastName, type) {
+  if(podcastName) {
+    const json = localStorage.getItem(podcastName + '_' + type);
+
+    try {
+      return JSON.parse(json);
+    } catch(e) {
+      console.log('Unable to load invalid saved JSON - ' + type);
+      console.error(e);
+      console.log(json);
+      return null;
+    }
   }
 }
 
-
-function getLocal(podcastName) {
-  return localStorage.getItem(podcastName + '_place');
+function set(podcastName, type, data) {
+  if(podcastName) {
+    setRaw(podcastName, type, JSON.stringify(data));
+  }
 }
 
-function setLocal(podcastName, blob) {
-  localStorage.setItem(podcastName + '_place', blob);
+function setRaw(podcastName, type, blob) {
+  localStorage.setItem(podcastName + '_' + type, blob);
 }
 
-function getEpisodes(podcastName) {
-  return localStorage.getItem(podcastName + '_episodes');
-}
 
-function setEpisodes(podcastName, blob) {
-  localStorage.setItem(podcastName + '_episodes', blob);
+function publicEpisodes(podcastName, episodes) {
+  return episodes.map(episode => {
+    const episodeUrlPrefix = `${location.protocol}//${location.host}/p/${podcastName}/episodes/${episode.index}/`;
+
+    return {
+      ...episode,
+      imageUrl: episodeUrlPrefix + 'image',
+      audioUrl: episodeUrlPrefix + 'audio',
+      cacheProgress: 0
+    };
+  });
 }

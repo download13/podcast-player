@@ -1,42 +1,66 @@
 import {
   ensureFileCached,
-  deleteSelectedFiles
+  deleteCachedFile
 } from '../../common/file-cache';
 import {
-  getCurrentEpisode,
-  getNextEpisode,
-  getPreviousEpisode
+  getEpisode
 } from '../store/selectors';
 
 
-export function keepEpisodesCached(store) {
-  let lastEpisode;
+export function keepEpisodesCached(store, state$, episodes$) {
+  const cacheCommand$ = state$
+    .pluck('cacheCommand')
+    .filter(cmd => !!cmd)
+    .distinctUntilChanged();
 
-  store.subscribe(() => {
-    const state = store.getState();
-    const {podcastName} = state;
-    const episode = getCurrentEpisode(state);
-    const nextEpisode = getNextEpisode(state, episode);
-    const prevEpisode = getPreviousEpisode(state, episode);
+  cacheCommand$
+    .subscribe(({type, payload: index}) => {
+      const episode = getEpisode(state$.getValue(), index);
 
-    if(podcastName) {
-      if(lastEpisode !== episode) {
-        const task = cleanupOtherEpisodes([prevEpisode, episode, nextEpisode])
-          .then(() => ensureEpisodeCached(episode));
+      const onProgress = progress => {
+        store.dispatch({
+          type: 'SET_EPISODE_CACHE_PROGRESS',
+          payload: {
+            index,
+            progress
+          }
+        });
+      };
 
-        if(nextEpisode) {
-          task.then(() => ensureEpisodeCached(nextEpisode));
-        }
-
-        lastEpisode = episode;
+      if(type === 'cache') {
+        ensureEpisodeCached(episode, onProgress)
+          .then(
+            () => onProgress(1),
+            err => {
+              console.error('ensureEpisodeCached error');
+              console.error(err);
+              onProgress('Error');
+            }
+          );
+      } else if(type === 'delete') {
+        deleteEpisode(episode)
+          .then(
+            () => onProgress(0),
+            err => {
+              console.error('deleteEpisode error');
+              console.error(err);
+              onProgress('Error');
+            }
+          );
       }
-    }
-  });
+    });
 }
 
-function ensureEpisodeCached(episode) {
+function ensureEpisodeCached(episode, onProgress) {
   return ensureFileCached(episode.imageUrl)
-    .then(() => ensureFileCached(episode.audioUrl));
+    .then(() => ensureFileCached(episode.audioUrl, {onProgress}));
+}
+
+function deleteEpisode(episode) {
+  return Promise.all([
+    deleteCachedFile(episode.imageUrl),
+    deleteCachedFile(episode.audioUrl)
+  ]);
 }
 
 function cleanupOtherEpisodes(episodes) {

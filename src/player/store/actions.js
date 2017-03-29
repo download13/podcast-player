@@ -4,3 +4,10 @@ export function seekRelative(position) {
     payload: position
   };
 }
+
+export function seekToPosition(position) {
+  return {
+    type: 'SEEK_TO_POSITION',
+    payload: position
+  };
+}

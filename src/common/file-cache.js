@@ -30,16 +30,21 @@ export function handleAndCacheFile(request) {
 
       return ensureFileRange(url, start, end)
         .then(bodyStream => {
-            return new Response(bodyStream, {
-              status: rangeRequest ? 206 : 200,
-              headers: {
-                'Accept-Ranges': 'bytes',
-                'Content-Range': `bytes ${start}-${end}/${size}`,
-                'Content-Length': end - start + 1,
-                'Content-Type': 'audio/ogg'
-              }
-            });
+          return new Response(bodyStream, {
+            status: rangeRequest ? 206 : 200,
+            headers: {
+              'Accept-Ranges': 'bytes',
+              'Content-Range': `bytes ${start}-${end}/${size}`,
+              'Content-Length': end - start + 1,
+              'Content-Type': 'audio/ogg'
+            }
           });
+        })
+        .catch(err => {
+          console.error('handleAndCacheFile error');
+          console.error(err);
+          return new Response(err.stack, {status: 500});
+        });
     });
 }
 
@@ -207,6 +212,7 @@ function ensureChunkCached(url, chunkInfo) {
 
 
 function existsInCache(cacheName, cachePath) {
+  console.log('existsInCache', cacheName, cachePath);
   return caches.open(cacheName)
     .then(cache => cache.match(cachePath))
     .then(res => !!res);

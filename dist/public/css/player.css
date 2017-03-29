@@ -4,7 +4,7 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0;
 }
 
-.player {
+.holder {
   margin: 0 auto;
   width: 100%;
   max-width: 412px;
@@ -19,7 +19,7 @@ input[type=number]::-webkit-outer-spin-button {
   color: white;
 }
 
-.titlebar > .back {
+.back {
   transform: rotateZ(180deg);
   display: flex;
   align-items: center;
@@ -170,4 +170,37 @@ input[type=number]::-webkit-outer-spin-button {
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+
+.episode, .bookmark {
+  display: flex;
+  align-items: center;
+}
+
+.episode-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 48px;
+  background-color: #f92977;
+  font-weight: bold;
+  color: white;
+}
+
+.episode-title, .bookmark-title {
+  cursor: pointer;
+  flex: 1 1 auto;
+  padding: 0px 0 0px 6px;
+}
+
+.bookmark-title {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+
+.lean-right {
+  margin-left: auto;
 }

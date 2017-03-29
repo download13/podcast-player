@@ -1,7 +1,8 @@
 import {createStore} from 'redux';
+import {getEpisode} from './selectors';
 
 
-export default () => createStore(playerReducer);
+export default () => createStore(playerReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 
 
 export const initialEpisodeInfo = {
@@ -9,7 +10,8 @@ export const initialEpisodeInfo = {
   size: 0,
   title: 'No Episode Loaded',
   imageUrl: '',
-  audioUrl: ''
+  audioUrl: '',
+  cacheProgress: 0
 };
 
 const initalPlayerState = {
@@ -19,16 +21,20 @@ const initalPlayerState = {
   selectedIndex: 0,
   playing: false,
   uiShowsPlaying: false,
-  seekToPosition: 0, // was playFromPosition
+  seekToPosition: 0,
   uiPosition: 0,
   duration: 0,
   autoplay: true,
-  volume: 1
+  volume: 1,
+  showingBookmarks: false,
+  showingEpisodes: false,
+  bookmarks: [],
+  cacheCommand: null
 };
 
 
 function playerReducer(state = initalPlayerState, {type, payload}) {
-  const {index, episodes} = state;
+  const {index} = state;
 
   switch(type) {
     case 'SET_PODCAST_NAME':
@@ -38,7 +44,7 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
     case 'CHANGE_PLAYING':
       return {...state, playing: payload};
     case 'SELECT_EPISODE':
-      if(payload >= 0 && payload < episodes.length) {
+      if(payload >= 0 && payload < state.episodes.length) {
         return {...state, selectedIndex: payload};
       } else {
         return state;
@@ -50,7 +56,7 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
     case 'CHANGE_VOLUME':
       return {...state, volume: payload};
     case 'NEXT_EPISODE':
-      if(index + 1 < episodes.length) {
+      if(index + 1 < state.episodes.length) {
         return {
           ...state,
           index: index + 1,
@@ -70,15 +76,20 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
         return state;
       }
     case 'SET_EPISODES':
-      if(payload && payload.length) {
+      if(Array.isArray(payload) && payload.length) {
         return {...state, episodes: payload};
       }
       return state;
-    case 'SET_EPISODE_STATUS':
-      const episode = getCurrentEpisode(state);
-      const newEpisodes = episodes.slice();
-      newEpisodes.splice(index, 1, {...episode, status});
-      return {...state, episodes: newEpisodes};
+    case 'SET_EPISODE_CACHE_PROGRESS':
+      const episode = getEpisode(state, payload.index);
+
+      return {
+        ...state,
+        episodes: replaceElement(state.episodes, payload.index, {
+          ...episode,
+          cacheProgress: payload.progress
+        })
+      };
     case 'SEEK_TO_POSITION':
       return {
         ...state,
@@ -133,7 +144,63 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
         duration: payload.duration,
         uiPosition: payload.position
       };
+    case 'SHOW_BOOKMARKS':
+      return {...state, showingBookmarks: true};
+    case 'HIDE_BOOKMARKS':
+      return {...state, showingBookmarks: false};
+    case 'SHOW_EPISODES':
+      return {...state, showingEpisodes: true};
+    case 'HIDE_EPISODES':
+      return {...state, showingEpisodes: false};
+    case 'SET_BOOKMARKS':
+      if(Array.isArray(payload)) {
+        return {...state, bookmarks: payload};
+      }
+      return state;
+    case 'CREATE_CURRENT_BOOKMARK':
+      return {
+        ...state,
+        bookmarks: addElement({
+          episode: state.index,
+          position: state.uiPosition
+        })
+      };
+    case 'DELETE_BOOKMARK':
+      return {
+        ...state,
+        bookmarks: removeElement(state.bookmarks, payload)
+      };
+    case 'SEND_CACHE_COMMAND':
+      return {
+        ...state,
+        cacheCommand: payload
+      };
     default:
       return state;
   }
+}
+
+
+function addElement(array, newElement) {
+  const r = array.slice();
+
+  r.push(newElement);
+
+  return r;
+}
+
+function replaceElement(array, index, newElement) {
+  const r = array.slice();
+
+  r[index] = newElement;
+
+  return r;
+}
+
+function removeElement(array, index) {
+  const r = array.slice();
+
+  r.splice(index, 1);
+
+  return r;
 }

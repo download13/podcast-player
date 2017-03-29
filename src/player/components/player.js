@@ -3,14 +3,12 @@ import PodcastImage from './podcast-image';
 import Audio from './audio';
 import {connect} from 'preact-redux';
 import debounce from 'debounce';
-import {seekRelative} from '../store/actions';
+import {formatTime} from '../../common';
+import {seekRelative, seekToPosition} from '../store/actions';
 import {getCurrentEpisode} from '../store/selectors';
 
 
-// TODO Sync features as buttons
-// TODO: Add volume control
 const Player = ({
-  index,
   selectedIndex,
   autoplay,
   playing,
@@ -35,16 +33,24 @@ const Player = ({
   seekForward30,
   selectEpisode,
   flushSelectedEpisode,
-  resetSelectedEpisode
+  resetSelectedEpisode,
+  showEpisodes,
+  showBookmarks
 }) => {
   const {title, imageUrl, audioUrl, status} = episode;
 
   return <div class="player">
     <div class="titlebar">
-      <a class="back button" href="/">
+      <a class="back button" title="Back to Podcasts" href="/">
         <span class="icon-play"></span>
       </a>
       <h1 class="title">{title}</h1>
+      <button title="Bookmarks" onClick={showBookmarks} style={{marginLeft: 'auto'}}>
+        <span class="icon-bookmark"></span>
+      </button>
+      <button title="Episodes" onClick={showEpisodes}>
+        <span class="icon-menu"></span>
+      </button>
     </div>
     <PodcastImage src={imageUrl}/>
     <Audio
@@ -147,7 +153,7 @@ export default connect(
     },
     seekScrubbedTo(e) {
       const position = parseInt(e.target.value);
-      dispatch({type: 'SEEK_TO_POSITION', payload: position});
+      dispatch(seekToPosition(position));
     },
     setVolumeTo(e) {
       const volume = parseFloat(e.target.value);
@@ -168,6 +174,7 @@ export default connect(
     selectEpisode(e) {
       const episodeNumber = parseInt(e.target.value);
       if(typeof episodeNumber === 'number' && !isNaN(episodeNumber)) {
+        console.log('sel', episodeNumber)
         dispatch({type: 'SELECT_EPISODE', payload: episodeNumber - 1});
       }
     },
@@ -178,27 +185,11 @@ export default connect(
       dispatch({type: 'FLUSH_SELECTED_EPISODE'});
       e.target.blur();
     },
-    storeRemoteState() {
-      // TODO:
-      if(!playing) {
-        const {podcast} = this.props;
-        storePlace(podcast, localStorage.getItem(podcast + '_place'));
-      }
+    showBookmarks() {
+      dispatch({type: 'SHOW_BOOKMARKS'});
+    },
+    showEpisodes() {
+      dispatch({type: 'SHOW_EPISODES'});
     }
   })
 )(Player);
-
-
-function formatTime(n) {
-  if(isNaN(n)) {
-    return '00:00';
-  }
-
-  let hours = Math.floor(n / 60);
-  if(hours < 10) hours = '0' + hours;
-
-  let minutes = Math.floor(n % 60);
-  if(minutes < 10) minutes = '0' + minutes;
-
-  return hours + ':' + minutes;
-}
