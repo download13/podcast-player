@@ -11,16 +11,15 @@ const Holder = ({
 }) => {
   const showingPlayer = !showingBookmarks && !showingEpisodes;
 
+  const bookmarks = showingBookmarks ? <Bookmarks/> : undefined;
+  const episodes = showingEpisodes ? <Episodes/> : undefined;
+
   return <div class="holder">
     <div style={showingStyle(showingPlayer)}>
       <Player />
     </div>
-    <div style={showingStyle(showingBookmarks)}>
-      <Bookmarks />
-    </div>
-    <div style={showingStyle(showingEpisodes)}>
-      <Episodes />
-    </div>
+    {bookmarks}
+    {episodes}
   </div>;
 };
 
@@ -32,7 +31,6 @@ export default connect(
 
 function showingStyle(showing) {
   return {
-    overflow: 'hidden',
-    height: showing ? 'auto' : 0
+    display: showing ? 'block' : 'none'
   };
 }

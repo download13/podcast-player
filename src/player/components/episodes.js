@@ -1,11 +1,10 @@
-import {h} from 'preact';
+import {h, Component} from 'preact';
 import {connect} from 'preact-redux';
 import {seekToPosition} from '../store/actions';
 
 
 const Episode = ({
   cacheProgress,
-  index,
   title,
 
   deleteEpisode,
@@ -31,77 +30,98 @@ const Episode = ({
     </div>;
   }
 
-  return <div class="episode" data-index={index}>
-    <div class="episode-title" onClick={playEpisode}>{title}</div>
+  return <div class="episode">
+    <div class="episode-title">{title}</div>
+    <button onClick={playEpisode}>
+      <span class="icon-play"></span>
+    </button>
     {button}
   </div>;
 };
 
-const Episodes = ({
-  episodes,
+class Episodes extends Component {
+  constructor(...args) {
+    super(...args);
 
-  hideEpisodes,
-  deleteEpisode,
-  cacheEpisode,
-  playEpisode
-}) => {
-  // TODO: Show size of all cached episodes
-  return <div class="episodes">
-    <div class="titlebar">
-      <button class="back" title="Back to Player" onClick={hideEpisodes}>
-        <span class="icon-play"></span>
-      </button>
-    </div>
-    <div>
-      {episodes.map(episode => <Episode {...episode} key={episode.index} deleteEpisode={deleteEpisode} cacheEpisode={cacheEpisode} playEpisode={playEpisode} />)}
-    </div>
-  </div>;
-};
+    this.readyToScroll = true;
+  }
+
+  componentDidMount() {
+    if(this.readyToScroll && this.selectedEpisodeEl) {
+      this.selectedEpisodeEl.scrollIntoView();
+
+      this.readyToScroll = false;
+    }
+  }
+
+  render({
+    index,
+    episodes,
+
+    hideEpisodes,
+    deleteEpisode,
+    cacheEpisode,
+    playEpisode
+  }) {
+    // TODO: Show size of all cached episodes
+    return <div>
+      <div class="titlebar">
+        <button class="back" title="Back to Player" onClick={hideEpisodes}>
+          <span class="icon-play"></span>
+        </button>
+      </div>
+      <div class="episodes">
+        {episodes.map(episode => {
+          const attributes = {};
+          if(index === episode.index) {
+            attributes.ref = el => this.selectedEpisodeEl = el;
+          }
+
+          return <div {...attributes}>
+            <Episode
+              {...episode}
+              key={episode.index}
+              deleteEpisode={() => deleteEpisode(episode.index)}
+              cacheEpisode={() => cacheEpisode(episode.index)}
+              playEpisode={() => playEpisode(episode.index)}
+            />
+          </div>
+        })}
+      </div>
+    </div>;
+  }
+}
 
 export default connect(
-  state => {
-    console.log('state Episodes', window.store.getState().episodes[0].cacheProgress)
-    console.log('Episodes', state.episodes[0].cacheProgress)
-    return state;
-  },
+  state => state,
   dispatch => ({
     hideEpisodes() {
       dispatch({type: 'HIDE_EPISODES'});
     },
-    playEpisode(e) {
-      const {index} = e.currentTarget.parentNode.dataset;
-
-      dispatch({type: 'SELECT_EPISODE', payload: episode});
+    playEpisode(index) {
+      dispatch({type: 'SELECT_EPISODE', payload: index});
       dispatch({type: 'FLUSH_SELECTED_EPISODE'});
-      dispatch(seekToPosition(position));
+      dispatch(seekToPosition(0));
       dispatch({type: 'CHANGE_PLAYING', payload: true});
       dispatch({type: 'HIDE_EPISODES'});
     },
-    cacheEpisode(e) {
-      const index = parseInt(e.currentTarget.parentNode.dataset.index);
-
-      if(!isNaN(index)) {
-        dispatch({
-          type: 'SEND_CACHE_COMMAND',
-          payload: {
-            type: 'cache',
-            payload: index
-          }
-        });
-      }
+    cacheEpisode(index) {
+      dispatch({
+        type: 'SEND_CACHE_COMMAND',
+        payload: {
+          type: 'cache',
+          payload: index
+        }
+      });
     },
-    deleteEpisode(e) {
-      const index = parseInt(e.currentTarget.parentNode.dataset.index);
-
-      if(!isNaN(index)) {
-        dispatch({
-          type: 'SEND_CACHE_COMMAND',
-          payload: {
-            type: 'delete',
-            payload: index
-          }
-        });
-      }
+    deleteEpisode(index) {
+      dispatch({
+        type: 'SEND_CACHE_COMMAND',
+        payload: {
+          type: 'delete',
+          payload: index
+        }
+      });
     }
   })
 )(Episodes);

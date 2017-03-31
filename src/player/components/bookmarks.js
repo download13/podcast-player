@@ -13,10 +13,10 @@ const Bookmark = ({
 }) => {
   return <div class="bookmark">
     <div class="bookmark-title">{episode + 1} - {formatTime(position)}</div>
-    <button data-episode={episode} data-position={position} onClick={gotoBookmark} class="lean-right">
+    <button onClick={gotoBookmark} class="lean-right">
       <span class="icon-play"></span>
     </button>
-    <button data-index={index} onClick={deleteBookmark}>
+    <button onClick={deleteBookmark}>
       <span class="icon-trash-empty"></span>
     </button>
   </div>;
@@ -30,7 +30,7 @@ const Bookmarks = ({
   deleteBookmark,
   gotoBookmark
 }) => {
-  return <div class="bookmarks">
+  return <div>
     <div class="titlebar">
       <button class="back" title="Back to Player" onClick={hideBookmarks}>
         <span class="icon-play"></span>
@@ -39,8 +39,16 @@ const Bookmarks = ({
         <span class="icon-plus-squared"></span>
       </button>
     </div>
-    <div>
-      {bookmarks.map((bookmark, i) => <Bookmark {...bookmark} key={i} index={i} gotoBookmark={gotoBookmark} deleteBookmark={deleteBookmark} />)}
+    <div class="bookmarks">
+      {bookmarks.map((bookmark, i) =>
+        <Bookmark
+          {...bookmark}
+          key={i}
+          index={i}
+          gotoBookmark={() => gotoBookmark(bookmark)}
+          deleteBookmark={() => deleteBookmark(bookmark)}
+        />
+      )}
     </div>
   </div>;
 };
@@ -54,17 +62,13 @@ export default connect(
     createBookmark() {
       dispatch({type: 'CREATE_CURRENT_BOOKMARK'});
     },
-    deleteBookmark(e) {
-      const {index} = e.target.dataset;
-      dispatch({type: 'DELETE_BOOKMARK', payload: index});
+    deleteBookmark(bookmark) {
+      dispatch({type: 'DELETE_BOOKMARK', payload: bookmark.index});
     },
-    gotoBookmark(e) {
-      const episode = parseInt(e.currentTarget.dataset.episode);
-      const position = parseFloat(e.currentTarget.dataset.position);
-
-      dispatch({type: 'SELECT_EPISODE', payload: episode});
+    gotoBookmark(bookmark) {
+      dispatch({type: 'SELECT_EPISODE', payload: bookmark.episode});
       dispatch({type: 'FLUSH_SELECTED_EPISODE'});
-      dispatch(seekToPosition(position));
+      dispatch(seekToPosition(bookmark.position));
       dispatch({type: 'CHANGE_PLAYING', payload: true});
       dispatch({type: 'HIDE_BOOKMARKS'});
     }

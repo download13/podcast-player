@@ -31,9 +31,6 @@ const Player = ({
   seekBackward30,
   seekForward5,
   seekForward30,
-  selectEpisode,
-  flushSelectedEpisode,
-  resetSelectedEpisode,
   showEpisodes,
   showBookmarks
 }) => {
@@ -87,25 +84,6 @@ const Player = ({
       </button>
       <button onClick={seekForward30} title="Forward 30 Seconds">
         30 <span class="icon-fast-fw"></span>
-      </button>
-    </div>
-    <div class="nav">
-      <button onClick={previousEpisode} title="Previous Episode">
-        <span class="icon-to-start-alt"></span>
-      </button>
-      <input
-        type="number"
-        onChange={selectEpisode}
-        onKeyUp={e => {
-          if(e.key === 'Enter') {
-            flushSelectedEpisode(e);
-          }
-        }}
-        onBlur={resetSelectedEpisode}
-        value={selectedIndex + 1}
-      />
-      <button onClick={nextEpisode} title="Next Episode">
-        <span class="icon-to-end-alt"></span>
       </button>
     </div>
     <div class="volume">
@@ -170,20 +148,6 @@ export default connect(
     },
     seekForward30() {
       dispatch(seekRelative(30));
-    },
-    selectEpisode(e) {
-      const episodeNumber = parseInt(e.target.value);
-      if(typeof episodeNumber === 'number' && !isNaN(episodeNumber)) {
-        console.log('sel', episodeNumber)
-        dispatch({type: 'SELECT_EPISODE', payload: episodeNumber - 1});
-      }
-    },
-    resetSelectedEpisode() {
-      dispatch({type: 'RESET_SELECTED_EPISODE'});
-    },
-    flushSelectedEpisode(e) {
-      dispatch({type: 'FLUSH_SELECTED_EPISODE'});
-      e.target.blur();
     },
     showBookmarks() {
       dispatch({type: 'SHOW_BOOKMARKS'});

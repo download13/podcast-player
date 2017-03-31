@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,13 +71,16 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_range_parser__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_range_parser__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_range_parser___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_range_parser__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pure__ = __webpack_require__(2);
 /* harmony export (immutable) */ __webpack_exports__["a"] = handleAndCacheFile;
 /* unused harmony export ensureFileCached */
+/* unused harmony export listCachedFiles */
 /* unused harmony export deleteCachedFile */
 /* unused harmony export deleteSelectedFiles */
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 
 
 
@@ -179,6 +182,12 @@ function ensureFileCached(url) {
   return pending;
 }
 
+function listCachedFiles() {
+  return caches.keys().then(function (keys) {
+    return keys.filter(__WEBPACK_IMPORTED_MODULE_1__pure__["a" /* isFileKey */]).map(__WEBPACK_IMPORTED_MODULE_1__pure__["b" /* fileKeyToUrl */]);
+  });
+}
+
 function deleteCachedFile(url) {
   var cacheName = CACHE_NAME_PREFIX + url;
 
@@ -187,10 +196,7 @@ function deleteCachedFile(url) {
 
 function deleteSelectedFiles(selector) {
   return caches.keys().then(function (cacheKeys) {
-    var deleteKeys = cacheKeys.filter(function (key) {
-      return key.startsWith(CACHE_NAME_PREFIX);
-    }) // Only check files
-    .filter(function (key) {
+    var deleteKeys = cacheKeys.filter(__WEBPACK_IMPORTED_MODULE_1__pure__["a" /* isFileKey */]).filter(function (key) {
       return selector(key.substr(CACHE_NAME_PREFIX.length));
     });
 
@@ -302,7 +308,6 @@ function ensureChunkCached(url, chunkInfo) {
 }
 
 function existsInCache(cacheName, cachePath) {
-  console.log('existsInCache', cacheName, cachePath);
   return caches.open(cacheName).then(function (cache) {
     return cache.match(cachePath);
   }).then(function (res) {
@@ -316,7 +321,9 @@ function fetchFromCache(cacheName, cachePath) {
   return caches.open(cacheName).then(function (cache) {
     return cache.match(cachePath);
   }).then(function (res) {
-    return res[type]();
+    if (res) {
+      return res[type]();
+    }
   });
 }
 
@@ -350,24 +357,9 @@ function fetchFileInfo(url, chunkSize) {
     return {
       url: url,
       size: size,
-      chunks: getChunkInfos(size, chunkSize)
+      chunks: __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__pure__["c" /* getChunkInfos */])(size, chunkSize)
     };
   });
-}
-
-function getChunkInfos(size, chunkSize) {
-  var chunkCount = Math.ceil(size / chunkSize);
-
-  var r = [];
-
-  for (var i = 0; i < chunkCount; i++) {
-    var start = i * chunkSize;
-    var end = Math.min(start + chunkSize - 1, size - 1);
-
-    r.push({ index: i, start: start, end: end });
-  }
-
-  return r;
 }
 
 /***/ }),
@@ -686,10 +678,43 @@ function getChunkInfos(size, chunkSize) {
     }();
   }]);
 });
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)(module)))
 
 /***/ }),
 /* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = isFileKey;
+/* harmony export (immutable) */ __webpack_exports__["b"] = fileKeyToUrl;
+/* harmony export (immutable) */ __webpack_exports__["c"] = getChunkInfos;
+var CACHE_NAME_PREFIX = '_bs:';
+
+function isFileKey(str) {
+  return str.startsWith(CACHE_NAME_PREFIX);
+}
+
+function fileKeyToUrl(key) {
+  return key.substr(CACHE_NAME_PREFIX.length);
+}
+
+function getChunkInfos(size, chunkSize) {
+  var chunkCount = Math.ceil(size / chunkSize);
+
+  var r = [];
+
+  for (var i = 0; i < chunkCount; i++) {
+    var start = i * chunkSize;
+    var end = Math.min(start + chunkSize - 1, size - 1);
+
+    r.push({ index: i, start: start, end: end });
+  }
+
+  return r;
+}
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -854,7 +879,7 @@ function sortByRangeStart (a, b) {
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -882,7 +907,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -5,6 +5,7 @@ import {
   playerKeyControls,
   mediaSessionControls
 } from './browser';
+import {listCachedFiles} from '../../common/file-cache';
 
 
 export function syncStoreToStorage(store) {
@@ -61,7 +62,8 @@ export function syncStoreToStorage(store) {
     .then(() => {
       loadEpisodesFromStorage(store);
 
-      //enumerateCachedEpisodes(); // TODO
+      loadCachedEpisodeState();
+      // TODO: When episodes loaded, inventory all the cached episodes and set the cacheProgress for each episode
 
       loadPlaceFromStorage(store);
     });
@@ -94,13 +96,44 @@ function saveBookmarksToServer(podcastName, bookmarks) {
       err => {
         console.error('saveBookmarksToServer error ' + podcastName);
         console.error(err);
-        console.log(bookmarks);
       }
     );
 }
 
 
-// TODO: When episodes loaded, inventory all the cached episodes and set the cacheProgress for each episode
+function loadCachedEpisodeState() {
+  return listCachedFiles()
+    .then(files =>
+      files
+        .filter(url => {
+          if(url.endsWith('/audio')) {
+            const match = url.match(/episodes\/([0-9]+)\/audio$/);
+            return match && match[1];
+          }
+          return false;
+        })
+        .map(url => {
+          const index = parseInt(url.match(/episodes\/([0-9]+)\/audio$/)[1]);
+          return index;
+        })
+    )
+    .then(indexes => {
+      const {episodes} = store.getState();
+
+      const newEpisodes = episodes.map((episode, i) => {
+        const cached = indexes.find(item => item === i);
+
+        return {
+          ...episode,
+          cacheProgress: cached ? 1 : 0
+        };
+      });
+
+      store.dispatch({type: 'SET_EPISODES', payload: newEpisodes});
+    });
+  // TODO return a list of episodes that are cached
+}
+
 function loadEpisodesFromServer(podcastName) {
   return fetch(`/p/${podcastName}/list`)
     .then(res => res.json())

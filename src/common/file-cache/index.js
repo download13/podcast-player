@@ -1,4 +1,9 @@
 import parseRange from 'range-parser';
+import {
+  isFileKey,
+  fileKeyToUrl,
+  getChunkInfos
+} from './pure';
 
 
 const DEFAULT_CHUNK_SIZE = 256 * 1024;
@@ -92,6 +97,15 @@ export function ensureFileCached(url, {onProgress} = {}) {
   return pending;
 }
 
+export function listCachedFiles() {
+  return caches.keys()
+    .then(keys =>
+      keys
+        .filter(isFileKey)
+        .map(fileKeyToUrl)
+    );
+}
+
 export function deleteCachedFile(url) {
   const cacheName = CACHE_NAME_PREFIX + url;
 
@@ -101,7 +115,7 @@ export function deleteCachedFile(url) {
 export function deleteSelectedFiles(selector) {
   return caches.keys().then(cacheKeys => {
     const deleteKeys = cacheKeys
-      .filter(key => key.startsWith(CACHE_NAME_PREFIX)) // Only check files
+      .filter(isFileKey)
       .filter(key => selector(key.substr(CACHE_NAME_PREFIX.length)));
 
     return Promise.all(deleteKeys.map(key => caches.delete(key)));
@@ -212,7 +226,6 @@ function ensureChunkCached(url, chunkInfo) {
 
 
 function existsInCache(cacheName, cachePath) {
-  console.log('existsInCache', cacheName, cachePath);
   return caches.open(cacheName)
     .then(cache => cache.match(cachePath))
     .then(res => !!res);
@@ -221,7 +234,11 @@ function existsInCache(cacheName, cachePath) {
 function fetchFromCache(cacheName, cachePath, type = 'arrayBuffer') {
   return caches.open(cacheName)
     .then(cache => cache.match(cachePath))
-    .then(res => res[type]());
+    .then(res => {
+      if(res) {
+        return res[type]();
+      }
+    });
 }
 
 function storeInCache(cacheName, cachePath, data) {
@@ -256,19 +273,4 @@ function fetchFileInfo(url, chunkSize) {
         chunks: getChunkInfos(size, chunkSize)
       };
     });
-}
-
-function getChunkInfos(size, chunkSize) {
-  const chunkCount = Math.ceil(size / chunkSize);
-
-  const r = [];
-
-  for(let i = 0; i < chunkCount; i++) {
-    const start = i * chunkSize;
-    const end = Math.min(start + chunkSize - 1, size - 1);
-
-    r.push({index: i, start, end});
-  }
-
-  return r;
 }

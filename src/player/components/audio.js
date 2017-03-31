@@ -54,7 +54,12 @@ export default class AudioComponent extends Component {
     }
 
     if(src && src !== props.src) {
-      try { el.pause(); } catch(e) { console.log('src change error', e) }
+      try {
+        el.pause();
+      } catch(e) {
+        console.error('Audio.src change error');
+        console.error(e);
+      }
 
       el.src = src;
 

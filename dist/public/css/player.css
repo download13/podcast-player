@@ -13,6 +13,10 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .titlebar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  max-width: 412px;
   display: flex;
   align-items: center;
   background-color: #f92977;
@@ -30,6 +34,10 @@ input[type=number]::-webkit-outer-spin-button {
   font-size: 1em;
   margin: 0;
   padding: 0.7em 10px;
+}
+
+.player {
+  padding-top: 48px;
 }
 
 @media (min-width: 412px) {
@@ -173,6 +181,11 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 
+.episodes, .bookmarks {
+  margin-top: 48px;
+  max-height: 100v;
+}
+
 .episode, .bookmark {
   display: flex;
   align-items: center;
@@ -190,7 +203,6 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .episode-title, .bookmark-title {
-  cursor: pointer;
   flex: 1 1 auto;
   padding: 0px 0 0px 6px;
 }

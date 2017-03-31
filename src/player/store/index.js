@@ -4,7 +4,7 @@ import {getEpisode} from './selectors';
 
 export default () => createStore(
   playerReducer
-  //, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  , window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
 
 
@@ -32,7 +32,8 @@ const initalPlayerState = {
   showingBookmarks: false,
   showingEpisodes: false,
   bookmarks: [],
-  cacheCommand: null
+  cacheCommand: null,
+  cacheSize: 0
 };
 
 
@@ -163,7 +164,7 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
     case 'CREATE_CURRENT_BOOKMARK':
       return {
         ...state,
-        bookmarks: addElement({
+        bookmarks: addElement(state.bookmarks, {
           episode: state.index,
           position: state.uiPosition
         })
@@ -177,6 +178,11 @@ function playerReducer(state = initalPlayerState, {type, payload}) {
       return {
         ...state,
         cacheCommand: payload
+      };
+    case 'SET_CACHE_SIZE':
+      return {
+        ...state,
+        cacheSize: payload
       };
     default:
       return state;
