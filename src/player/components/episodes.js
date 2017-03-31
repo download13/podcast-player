@@ -63,6 +63,8 @@ class Episodes extends Component {
     cacheEpisode,
     playEpisode
   }) {
+    const scrollIndex = Math.max(index - 1, 0);
+
     // TODO: Show size of all cached episodes
     return <div>
       <div class="titlebar">
@@ -73,7 +75,7 @@ class Episodes extends Component {
       <div class="episodes">
         {episodes.map(episode => {
           const attributes = {};
-          if(index === episode.index) {
+          if(scrollIndex === episode.index) {
             attributes.ref = el => this.selectedEpisodeEl = el;
           }
 

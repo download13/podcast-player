@@ -131,7 +131,6 @@ function loadCachedEpisodeState() {
 
       store.dispatch({type: 'SET_EPISODES', payload: newEpisodes});
     });
-  // TODO return a list of episodes that are cached
 }
 
 function loadEpisodesFromServer(podcastName) {
