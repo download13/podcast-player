@@ -4760,7 +4760,7 @@ var Bookmarks = function Bookmarks(_ref2) {
             return _gotoBookmark(bookmark);
           },
           deleteBookmark: function deleteBookmark() {
-            return _deleteBookmark(bookmark);
+            return _deleteBookmark(i);
           }
         }));
       })
@@ -4778,8 +4778,8 @@ var Bookmarks = function Bookmarks(_ref2) {
     createBookmark: function createBookmark() {
       dispatch({ type: 'CREATE_CURRENT_BOOKMARK' });
     },
-    deleteBookmark: function deleteBookmark(bookmark) {
-      dispatch({ type: 'DELETE_BOOKMARK', payload: bookmark.index });
+    deleteBookmark: function deleteBookmark(index) {
+      dispatch({ type: 'DELETE_BOOKMARK', payload: index });
     },
     gotoBookmark: function gotoBookmark(bookmark) {
       dispatch({ type: 'SELECT_EPISODE', payload: bookmark.episode });

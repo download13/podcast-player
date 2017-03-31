@@ -46,7 +46,7 @@ const Bookmarks = ({
           key={i}
           index={i}
           gotoBookmark={() => gotoBookmark(bookmark)}
-          deleteBookmark={() => deleteBookmark(bookmark)}
+          deleteBookmark={() => deleteBookmark(i)}
         />
       )}
     </div>
@@ -62,8 +62,8 @@ export default connect(
     createBookmark() {
       dispatch({type: 'CREATE_CURRENT_BOOKMARK'});
     },
-    deleteBookmark(bookmark) {
-      dispatch({type: 'DELETE_BOOKMARK', payload: bookmark.index});
+    deleteBookmark(index) {
+      dispatch({type: 'DELETE_BOOKMARK', payload: index});
     },
     gotoBookmark(bookmark) {
       dispatch({type: 'SELECT_EPISODE', payload: bookmark.episode});
