@@ -148,10 +148,10 @@ function loadBookmarksFromServer(podcastName) {
     return Promise.resolve();
   };
 
-  return loadFromServer(podcastName, 'bookmarks')
+  return loadFromServer(podcastName, 'bookmarks', token)
 }
 
-function loadFromServer(podcastName, type) {
+function loadFromServer(podcastName, type, token) {
   return fetch(`/sync/get/${podcastName}_${type}`, {
     headers: {
       Authorization: `Bearer ${token}`
