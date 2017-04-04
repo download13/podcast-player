@@ -204,7 +204,9 @@ function loadEpisodesFromStorage(store) {
 
   const episodes = get(podcastName, 'episodes');
 
-  store.dispatch({type: 'SET_EPISODES', payload: episodes});
+  if(episodes) {
+    store.dispatch({type: 'SET_EPISODES', payload: episodes});
+  }
 }
 
 function loadPlaceFromStorage(store) {
@@ -212,7 +214,9 @@ function loadPlaceFromStorage(store) {
 
   const loadedState = get(podcastName, 'place');
 
-  store.dispatch({type: 'RESTORE_STATE', payload: loadedState});
+  if(loadedState) {
+    store.dispatch({type: 'RESTORE_STATE', payload: loadedState});
+  }
 }
 
 function loadBookmarksFromStorage(store) {
@@ -220,7 +224,9 @@ function loadBookmarksFromStorage(store) {
 
   const bookmarks = get(podcastName, 'bookmarks');
 
-  store.dispatch({type: 'SET_BOOKMARKS', payload: bookmarks});
+  if(bookmarks) {
+    store.dispatch({type: 'SET_BOOKMARKS', payload: bookmarks});
+  }
 }
 
 
