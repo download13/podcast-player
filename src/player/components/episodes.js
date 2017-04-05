@@ -74,20 +74,18 @@ class Episodes extends Component {
       </div>
       <div class="episodes">
         {episodes.map(episode => {
-          const attributes = {};
+          const episodeEl = <Episode
+            {...episode}
+            deleteEpisode={() => deleteEpisode(episode.index)}
+            cacheEpisode={() => cacheEpisode(episode.index)}
+            playEpisode={() => playEpisode(episode.index)}
+          />;
+
           if(scrollIndex === episode.index) {
-            attributes.ref = el => this.selectedEpisodeEl = el;
+            return <div key={episode.index} ref={el => this.selectedEpisodeEl = el}>{episodeEl}</div>;
           }
 
-          return <div {...attributes}>
-            <Episode
-              {...episode}
-              key={episode.index}
-              deleteEpisode={() => deleteEpisode(episode.index)}
-              cacheEpisode={() => cacheEpisode(episode.index)}
-              playEpisode={() => playEpisode(episode.index)}
-            />
-          </div>
+          return <div key={episode.index}>{episodeEl}</div>;
         })}
       </div>
     </div>;
