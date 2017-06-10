@@ -1,17 +1,7 @@
 import parseRange from 'range-parser';
-import {
-  isFileKey,
-  fileKeyToUrl,
-  getChunkInfos
-} from './pure';
-import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/operator/share';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/ignoreElements';
-import 'rxjs/add/operator/concat';
 
 
-const DEFAULT_CHUNK_SIZE = 256 * 1024;
+const DEFAULT_CHUNK_SIZE = 128 * 1024;
 const CACHE_NAME_PREFIX = '_bs:';
 const CACHE_PATH_PREFIX = '/_bs/';
 const FILE_INFO_PATH = CACHE_PATH_PREFIX + 'info';
@@ -33,111 +23,57 @@ export function handleAndCacheFile(request) {
       try {
         [{start, end}] = parseRange(size, rangeHeader);
       } catch(e) {
-        console.error('handleAndCacheFile error: invalid range');
         console.error(e);
         return new Response('Invalid range', {status: 416});
       }
 
       return ensureFileRange(url, start, end)
-        .then(bodyStream => {
-          return new Response(bodyStream, {
-            status: rangeRequest ? 206 : 200,
-            headers: {
-              'Accept-Ranges': 'bytes',
-              'Content-Range': `bytes ${start}-${end}/${size}`,
-              'Content-Length': end - start + 1,
-              'Content-Type': 'audio/ogg'
-            }
-          });
-        })
-        .catch(err => {
-          console.error('handleAndCacheFile error');
-          console.error(err);
-          return new Response(err.stack, {status: 500});
-        });
+        .then(bodyStream => new Response(bodyStream, {
+          status: rangeRequest ? 206 : 200,
+          headers: {
+            'Accept-Ranges': 'bytes',
+            'Content-Range': `bytes ${start}-${end}/${size}`,
+            'Content-Length': end - start + 1,
+            'Content-Type': 'audio/ogg'
+          }
+        }));
     });
 }
 
+export function ensureFileCached(url, {onProgress} = {}) {
+  return ensureFileInfoCached(url)
+    .then(({chunks, size}) => {
+      let progress = 0;
 
-function asyncCacheForSameArgument(fn) {
-  const pending = new Map();
+      const nextChunk = () => {
+        if(chunks.length === 0) {
+          resolve();
+          return;
+        }
 
-  return (arg) => {
-    if(pending.has(arg)) {
-      return pending.get(arg);
-    }
+        const chunkInfo = chunks.shift();
 
-    const asyncResult = fn(arg)
-      .do(null, null, () => pending.delete(arg))
-      .share();
-
-    pending.set(arg, asyncResult);
-
-    return asyncResult;
-  };
-}
-
-export const ensureFileCached = asyncCacheForSameArgument((url) => {
-  return Observable.create(observer => {
-    let done = false;
-
-    observer.next(0);
-
-    ensureFileInfoCached(url)
-      .then(({chunks, size}) => {
-        let progress = 0;
-
-        const nextChunk = () => {
-          if(chunks.length === 0 || done) {
-            observer.complete();
-            return;
-          }
-
-          const chunkInfo = chunks.shift();
-
-          // TODO: Retry this a couple times in the event of failure
-          return ensureChunkCached(url, chunkInfo)
-            .then(() => {
+        // TODO: Retry this a couple times in the event of failure
+        return ensureChunkCached(url, chunkInfo)
+          .then(() => {
+            if(onProgress) {
               progress += chunkInfo.end - chunkInfo.start + 1;
-              observer.next(progress / size);
 
-              return nextChunk();
-            });
-        };
+              onProgress(progress / size);
+            }
 
-        return nextChunk();
-      })
-      .catch(err => observer.error(err));
+            return nextChunk();
+          });
+      };
 
-    return () => {
-      done = true;
-    };
-  });
-});
-
-export function listCachedFiles() {
-  return caches.keys()
-    .then(keys =>
-      keys
-        .filter(isFileKey)
-        .map(fileKeyToUrl)
-    );
+      return nextChunk();
+    });
 }
 
 export function deleteCachedFile(url) {
   const cacheName = CACHE_NAME_PREFIX + url;
 
   return caches.delete(cacheName);
-}
-
-export function deleteSelectedFiles(selector) {
-  return caches.keys().then(cacheKeys => {
-    const deleteKeys = cacheKeys
-      .filter(isFileKey)
-      .filter(key => selector(key.substr(CACHE_NAME_PREFIX.length)));
-
-    return Promise.all(deleteKeys.map(key => caches.delete(key)));
-  });
 }
 
 // Returns a Promise of a ReadableStream
@@ -182,48 +118,26 @@ function ensureFileRange(url, start, end) {
 }
 
 
-const fileInfoPending = {};
-
 function ensureFileInfoCached(url, chunkSize = DEFAULT_CHUNK_SIZE) {
   const cacheName = CACHE_NAME_PREFIX + url;
 
-  if(fileInfoPending[url]) {
-    return fileInfoPending[url];
-  }
-
-  const pending = existsInCache(cacheName, FILE_INFO_PATH)
+  return existsInCache(cacheName, FILE_INFO_PATH)
     .then(exists => {
       if(!exists) {
         return fetchFileInfo(url, chunkSize)
           .then(fileInfo => storeInCache(cacheName, FILE_INFO_PATH, JSON.stringify(fileInfo))
-          .then(() => fileInfo));
+            .then(() => fileInfo));
       } else {
         return fetchFromCache(cacheName, FILE_INFO_PATH, 'json');
       }
-    })
-    .then(r => {
-      delete fileInfoPending[url];
-      return r;
     });
-
-  fileInfoPending[url] = pending;
-
-  return pending;
 }
-
-
-const chunksPending = {};
 
 function ensureChunkCached(url, chunkInfo) {
   const cacheName = CACHE_NAME_PREFIX + url;
   const cachePath = CACHE_PATH_PREFIX + `chunks/${chunkInfo.start}-${chunkInfo.end}`;
-  const pendingKey = url + ':' + chunkInfo.start + '-' + chunkInfo.end;
 
-  if(chunksPending[pendingKey]) {
-    return chunksPending[pendingKey];
-  }
-
-  const pending = existsInCache(cacheName, cachePath)
+  return existsInCache(cacheName, cachePath)
     .then(exists => {
       if(!exists) {
         return fetchChunk(url, chunkInfo)
@@ -231,15 +145,7 @@ function ensureChunkCached(url, chunkInfo) {
       } else {
         return fetchFromCache(cacheName, cachePath);
       }
-    })
-    .then(r => {
-      delete chunksPending[pendingKey];
-      return r;
     });
-
-  chunksPending[pendingKey] = pending;
-
-  return pending;
 }
 
 
@@ -252,11 +158,7 @@ function existsInCache(cacheName, cachePath) {
 function fetchFromCache(cacheName, cachePath, type = 'arrayBuffer') {
   return caches.open(cacheName)
     .then(cache => cache.match(cachePath))
-    .then(res => {
-      if(res) {
-        return res[type]();
-      }
-    });
+    .then(res => res[type]());
 }
 
 function storeInCache(cacheName, cachePath, data) {
@@ -291,4 +193,19 @@ function fetchFileInfo(url, chunkSize) {
         chunks: getChunkInfos(size, chunkSize)
       };
     });
+}
+
+function getChunkInfos(size, chunkSize) {
+  const chunkCount = Math.ceil(size / chunkSize);
+
+  const r = [];
+
+  for(let i = 0; i < chunkCount; i++) {
+    const start = i * chunkSize;
+    const end = Math.min(start + chunkSize - 1, size - 1);
+
+    r.push({index: i, start, end});
+  }
+
+  return r;
 }

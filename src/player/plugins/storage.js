@@ -1,11 +1,10 @@
 import {Observable, storeObservable} from './common';
-import {keepEpisodesCached} from './cache';
+import {keepEpisodesCached, getCachedEpisodeState} from './cache';
 import {
   syncTitle,
   playerKeyControls,
   mediaSessionControls
 } from './browser';
-import {listCachedFiles} from '../../common/file-cache';
 
 
 export function syncStoreToStorage(store) {
@@ -62,8 +61,7 @@ export function syncStoreToStorage(store) {
     .then(() => {
       loadEpisodesFromStorage(store);
 
-      loadCachedEpisodeState();
-      // TODO: When episodes loaded, inventory all the cached episodes and set the cacheProgress for each episode
+      loadCachedEpisodeState(store);
 
       loadPlaceFromStorage(store);
     });
@@ -101,31 +99,15 @@ function saveBookmarksToServer(podcastName, bookmarks) {
 }
 
 
-function loadCachedEpisodeState() {
-  return listCachedFiles()
-    .then(files =>
-      files
-        .filter(url => {
-          if(url.endsWith('/audio')) {
-            const match = url.match(/episodes\/([0-9]+)\/audio$/);
-            return match && match[1];
-          }
-          return false;
-        })
-        .map(url => {
-          const index = parseInt(url.match(/episodes\/([0-9]+)\/audio$/)[1]);
-          return index;
-        })
-    )
-    .then(indexes => {
-      const {episodes} = store.getState();
+function loadCachedEpisodeState(store) {
+  const {episodes} = store.getState();
 
+  return getCachedEpisodeState(episodes)
+    .then(progresses => {
       const newEpisodes = episodes.map((episode, i) => {
-        const cached = indexes.find(item => item === i);
-
         return {
           ...episode,
-          cacheProgress: cached ? 1 : 0
+          cacheProgress: progresses[i].progress
         };
       });
 

@@ -1,10 +1,9 @@
 import {
   ensureFileCached,
-  deleteCachedFile
+  deleteCachedFile,
+  listCachedFiles
 } from '../../common/file-cache';
-import {
-  getEpisode
-} from '../store/selectors';
+import {getEpisode} from '../store/selectors';
 
 
 export function keepEpisodesCached(store, state$, episodes$) {
@@ -17,7 +16,7 @@ export function keepEpisodesCached(store, state$, episodes$) {
     .subscribe(({type, payload: index}) => {
       const episode = getEpisode(state$.getValue(), index);
 
-      const onProgress = progress => {
+      const updateProgress = progress => {
         store.dispatch({
           type: 'SET_EPISODE_CACHE_PROGRESS',
           payload: {
@@ -28,9 +27,9 @@ export function keepEpisodesCached(store, state$, episodes$) {
       };
 
       if(type === 'cache') {
-        ensureEpisodeCached(episode, onProgress)
-          .then(
-            () => onProgress(1),
+        ensureEpisodeCached(episode)
+          .subscribe(
+            progress => updateProgress(progress),
             err => {
               console.error('ensureEpisodeCached error');
               console.error(err);
@@ -40,7 +39,7 @@ export function keepEpisodesCached(store, state$, episodes$) {
       } else if(type === 'delete') {
         deleteEpisode(episode)
           .then(
-            () => onProgress(0),
+            () => updateProgress(0),
             err => {
               console.error('deleteEpisode error');
               console.error(err);
@@ -51,9 +50,10 @@ export function keepEpisodesCached(store, state$, episodes$) {
     });
 }
 
-function ensureEpisodeCached(episode, onProgress) {
+export function ensureEpisodeCached(episode) {
   return ensureFileCached(episode.imageUrl)
-    .then(() => ensureFileCached(episode.audioUrl, {onProgress}));
+    .ignoreElements()
+    .concat(ensureFileCached(episode.audioUrl));
 }
 
 function deleteEpisode(episode) {
@@ -73,4 +73,38 @@ function cleanupOtherEpisodes(episodes) {
       return false;
     });
   });
+}
+
+
+export function getCachedEpisodeState(episodes) {
+  const state = episodes.map(episode => ({
+    shouldCache: false,
+    progress: 0
+  }));
+
+  return listCachedFiles()
+    .then(files =>
+      files
+        .filter(url => {
+          if(url.endsWith('/audio')) {
+            const match = url.match(/episodes\/([0-9]+)\/audio$/);
+            return match && match[1];
+          }
+          return false;
+        })
+        .map(url => {
+          const index = parseInt(url.match(/episodes\/([0-9]+)\/audio$/)[1]);
+          return index;
+        })
+    )
+    .then(cachedIndexes => {
+      cachedIndexes.forEach(index => {
+        const episode = state[index];
+
+        episode.progress = 1;
+        episode.shouldCache = true;
+      });
+
+      return state;
+    });
 }
