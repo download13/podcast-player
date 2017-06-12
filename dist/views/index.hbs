@@ -1,14 +1,2 @@
-<link rel="stylesheet" href="/css/index.css">
-<div class="syncbar">
-  <a class="syncbtn button" href="/sync">Sync</a>
-</div>
-<div class="podcasts">
-{{#podcasts}}
-  {{>podcast}}
-{{/podcasts}}
-</div>
-<script>
-if(navigator.serviceWorker) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
+<div id="mountpoint"></div>
+<script src="/js/app.js"></script>

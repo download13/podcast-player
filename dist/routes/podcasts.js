@@ -10,14 +10,6 @@ const {
 const ICONS_PATH = path.resolve(__dirname, '../podcast-icons');
 
 module.exports = app => {
-  app.get('/p/', (req, res) => {
-    res.render('player');
-  });
-
-  app.get('/p/:podcast', (req, res) => {
-    res.render('player');
-  });
-
   app.get('/p/:podcast/list', (req, res, next) => {
     getEpisodes(req.params.podcast).then(
       episodes => {

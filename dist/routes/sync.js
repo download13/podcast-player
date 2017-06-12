@@ -10,10 +10,6 @@ const {
 
 
 module.exports = app => {
-  app.get('/sync', (req, res) => {
-    res.render('sync');
-  });
-
   app.post('/sync/create', (req, res) => {
     res.type('text').send(createJWT());
   });
