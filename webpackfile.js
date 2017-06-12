@@ -1,3 +1,17 @@
+const plugins = [
+  ['transform-react-jsx', {pragma: 'h'}],
+  'babel-plugin-transform-object-rest-spread',
+  'babel-plugin-transform-async-to-generator',
+  'check-es2015-constants',
+  'transform-es2015-arrow-functions',
+  'transform-es2015-block-scoped-functions',
+  'transform-es2015-block-scoping',
+  'transform-es2015-destructuring',
+  'transform-es2015-shorthand-properties',
+  'transform-es2015-spread',
+  'transform-es2015-template-literals'
+];
+
 const babelJsxModule = {
   rules: [
     {
@@ -5,14 +19,7 @@ const babelJsxModule = {
       exclude: /node_modules/,
       loader: 'babel-loader',
       options: {
-        presets: [
-          ['babel-preset-es2015', {modules: false}]
-        ],
-        plugins: [
-          ['transform-react-jsx', {pragma: 'h'}],
-          'babel-plugin-transform-object-rest-spread',
-          'babel-plugin-transform-async-to-generator'
-        ]
+        plugins
       }
     }
   ]
@@ -20,18 +27,10 @@ const babelJsxModule = {
 
 module.exports = [
   { // /p/{podcast}
-    entry: __dirname + '/src/player/index.js',
+    entry: __dirname + '/src/client/index.js',
     output: {
       path: __dirname + '/dist/public/js',
-      filename: 'player.js'
-    },
-    module: babelJsxModule
-  },
-  { // /sync
-    entry: __dirname + '/src/sync/index.js',
-    output: {
-      path: __dirname + '/dist/public/js',
-      filename: 'sync.js'
+      filename: 'app.js'
     },
     module: babelJsxModule
   },
@@ -41,19 +40,6 @@ module.exports = [
       path: __dirname + '/dist/public',
       filename: 'sw.js'
     },
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          exclude: /node_modules/,
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              ['babel-preset-es2015', {modules: false}]
-            ]
-          }
-        }
-      ]
-    }
+    module: babelJsxModule
   }
 ];
