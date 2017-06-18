@@ -18,6 +18,7 @@ const feedCache = new AsyncCache({
       while(item = fp.read()) {
         if(item.enclosures.length === 0) continue;
         episodes.unshift({
+          date: new Date(item.pubDate).getTime(),
           size: parseInt(item.enclosures[0].length),
           title: item.title,
           imageUrl: item.image ? item.image.url : '',
