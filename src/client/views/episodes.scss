@@ -1,0 +1,28 @@
+@import './common.scss';
+
+
+.episodes {
+  @include list;
+}
+
+.episode {
+  @include list-row;
+}
+
+.title {
+  flex: 1 1 auto;
+  font-size: 1em;
+  margin: 0;
+  padding: 0.7em 10px;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 48px;
+  background-color: $primary-color;
+  font-weight: bold;
+  color: white;
+}

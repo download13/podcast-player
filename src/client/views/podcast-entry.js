@@ -1,5 +1,5 @@
 import {h} from 'hyperapp';
-import {Link} from './components';
+import Link from './components/link';
 
 
 export default ({name, humanName, go}) => {

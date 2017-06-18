@@ -5,6 +5,7 @@ import indexView from './views/index';
 import syncView from './views/sync';
 import episodesView from './views/episodes';
 import bookmarksView from './views/bookmarks';
+import playerView from './views/player';
 
 import SyncPlugin from './plugins/sync';
 
@@ -26,12 +27,22 @@ const PlayerPlugin = app => {
   return {
     state: {
       podcastName: '',
-      episodeIndex: 0
+      episodeIndex: 0,
+      player: {
+        episode: null
+      }
     },
     events: {
       update(state, actions, data, emit) {
         // TODO: Control the audio player on changes from this
         return data;
+      },
+      render(state, actions, view, emit) {
+        return (state, actions) =>
+          <div class="app-holder">
+            {view(state, actions)}
+            {playerView(state, actions)}
+          </div>
       }
     }
   };
@@ -47,23 +58,31 @@ app({
     '/p/:podcastName/bookmarks': bookmarksView
   },
   actions: {
-    selectView(state, actions, {view, podcastName}) {
-      // view should be one of ['index', 'sync', 'episodes', 'bookmarks']
-    },
     episodeList: {
       play(state, actions, episodeIndex) {
         return {
-          ...state,
-          episodeList: {
-            playing: episodeIndex
-          },
           player: {
-            url: state.episodeList.episodes[episodeIndex].url
+            episode: state.episodeList.episodes[episodeIndex]
           }
         };
       },
-      async load(state, actions, podcastName) {
-        // TODO load from server or local cache
+      setEpisodes(state, actions, episodes) {
+        return {
+          episodeList: {
+            episodes
+          }
+        };
+      },
+      async load(state, actions) {
+        const {podcastName} = state.router.params;
+
+        const res = await fetch(`/p/${podcastName}/list`);
+
+        if(res.ok) {
+          const episodes = await res.json();
+
+          actions.episodeList.setEpisodes(episodes);
+        }
       }
     },
     storage: {
@@ -78,16 +97,12 @@ app({
   events: {
     update(state, actions, data) {
       if(data.router && data.router.match) {
-        const {match, params} = data.router;
+        const {match} = data.router;
 
-        if(match === '/') {
-          actions.selectView({view: 'index'});
-        } else if(match === '/sync') {
-          actions.selectView({view: 'sync'});
-        } else if(match === '/p/:podcastName') {
-          actions.selectView({view: 'episodes', podcastName: params.podcastName});
+        if(match === '/p/:podcastName') {
+          actions.episodeList.load();
         } else if(match === '/p/:podcastName/bookmarks') {
-          actions.selectView({view: 'bookmarks', podcastName: params.podcastName});
+          // TODO refresh bookmark data from server
         }
       }
     }

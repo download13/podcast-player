@@ -1,16 +1,6 @@
 import {getCurrentEpisode} from '../store/selectors';
 
 
-export function loadEpisodes(store) {
-  const {podcastName} = store.getState();
-
-  return fetch(`/p/${podcastName}/list`)
-    .then(res => res.json())
-    .then(episodes => {
-      store.dispatch({type: 'SET_EPISODES', payload: episodes});
-    });
-}
-
 export function syncTitle(store) {
   const flushTitle = () => {
     const {title, imageUrl} = getCurrentEpisode(store.getState());

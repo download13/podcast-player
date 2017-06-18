@@ -1,36 +1,41 @@
 import {h} from 'hyperapp';
-import {Link} from './components';
+import Link from './components/link';
+import {ProgressPlayPauseButton} from './components/play-pause-button';
+import styles from './episodes.scss';
 
 
 const Episode = ({
-  cacheProgress,
   title,
+  date,
+  downloadProgress,
 
   deleteEpisode,
-  cacheEpisode,
+  downloadEpisode,
   playEpisode
 }) => {
   let button;
-  if(cacheProgress === 1) {
-    button = <button onClick={deleteEpisode} class="lean-right">
+  if(downloadProgress === 1) {
+    button = <button onclick={deleteEpisode} class={styles.leanRight}>
       <span class="icon-trash-empty"></span>
     </button>;
-  } else if(cacheProgress === 0) {
-    button = <button onClick={cacheEpisode} class="lean-right">
+  } else if(downloadProgress === 0) {
+    button = <button onclick={downloadEpisode} class={styles.leanRight}>
       <span class="icon-download-cloud"></span>
     </button>;
-  } else if(typeof cacheProgress !== 'number') {
-    button = <div class="episode-progress">
-      {cacheProgress}
+  } else if(typeof downloadProgress !== 'number') {
+    button = <div class={styles.progress}>
+      {downloadProgress}
     </div>;
   } else {
-    button = <div class="episode-progress">
-      {Math.round(cacheProgress * 100) + '%'}
+    button = <div class={styles.progress}>
+      {Math.round(downloadProgress * 100) + '%'}
     </div>;
   }
 
-  return <div class="episode">
-    <div class="episode-title">{title}</div>
+  return <div class={styles.episode}>
+    <time datetime={formatDate(date)}>{formatHumanDate(date)}</time>
+    <div class={styles.title}>{title}</div>
+    <ProgressPlayPauseButton progress={1} playing={false} color={'#fff'}/>
     <button onClick={playEpisode}>
       <span class="icon-play"></span>
     </button>
@@ -38,35 +43,21 @@ const Episode = ({
   </div>;
 };
 
-class Episodes {
-  render({
-    index,
-
-    hideEpisodes,
-    deleteEpisode,
-    cacheEpisode,
-    playEpisode
-  }) {
-
-  }
-}
 
 export default (state, actions) => {
   // TODO: When showing this page, scroll to the currently playing episode if there is one
-  actions.episodeList.load(state.router.params.podcastName);
-
   const {episodes} = state.episodeList;
 
   const {downloadEpisode, deleteEpisode} = actions.storage;
 
   // TODO: Show size of all cached episodes
   return <div>
-    <div class="titlebar">
-      <Link class="back" title="Back to Podcasts" href="/" go={actions.router.go}>
+    <div class={styles.titlebar}>
+      <Link class={styles.back} title="Back to Podcasts" href="/" go={actions.router.go}>
         <span class="icon-play"></span>
       </Link>
     </div>
-    <div class="episodes">
+    <div class={styles.episodes}>
       {episodes.map(episode => {
         return <Episode
           key={episode.index}
@@ -76,3 +67,16 @@ export default (state, actions) => {
     </div>
   </div>;
 };
+
+
+function formatDate(time) {
+  const d = new Date(time);
+
+  return (d.getYear() + 1900) + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+
+function formatHumanDate(time) {
+  const d = new Date(time);
+
+  return (d.getMonth() + 1) + '/' + d.getDate();
+}

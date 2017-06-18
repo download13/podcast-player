@@ -1,8 +1,16 @@
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+@import './common.scss';
+
+
+.app-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background-color: $primary-color;
+  height: 64px;
 }
+
 
 .holder {
   margin: 0 auto;
@@ -10,30 +18,6 @@ input[type=number]::-webkit-outer-spin-button {
   max-width: 412px;
   display: flex;
   flex-direction: column;
-}
-
-.titlebar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  max-width: 412px;
-  display: flex;
-  align-items: center;
-  background-color: #f92977;
-  color: white;
-}
-
-.back {
-  transform: rotateZ(180deg);
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-}
-
-.titlebar > .title {
-  font-size: 1em;
-  margin: 0;
-  padding: 0.7em 10px;
 }
 
 .player {
@@ -55,8 +39,8 @@ input[type=number]::-webkit-outer-spin-button {
   height: 48px;
   width: 100%;
   display: flex;
-  border: solid 2px #f92977;
-  background-color: #f92977;
+  border: solid 2px $primary-color;
+  background-color: $primary-color;
   align-items: center;
 }
 
@@ -68,7 +52,7 @@ input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   outline: none;
   width: 100%;
-  background-color: #f92977;
+  background-color: $primary-color;
 }
 
 .scrubber::-webkit-slider-runnable-track {
@@ -91,7 +75,7 @@ input[type=number]::-webkit-outer-spin-button {
   line-height: 48px;
   height: 100%;
   color: white;
-  background-color: #f92977;
+  background-color: $primary-color;
   font-size: 20px;
   white-space: nowrap;
   padding: 0 5px 0 15px;
@@ -107,8 +91,8 @@ input[type=number]::-webkit-outer-spin-button {
 
 .nav {
   display: flex;
-  background-color: #f92977;
-  border: solid 2px #f92977;
+  background-color: $primary-color;
+  border: solid 2px $primary-color;
   justify-content: space-around;
 }
 
@@ -132,55 +116,6 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 
-@keyframes spin {
-  from {
-    transform: rotateZ(0);
-  }
-
-  to {
-    transform: rotateZ(360deg);
-  }
-}
-
-.icon-spin::before {
-  animation-name: spin;
-  animation-duration: 1s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-@font-face {
-  font-family: 'icons';
-  src: url('/css/icons.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-
-
-[class^="icon-"]:before, [class*=" icon-"]:before {
-  font-family: "icons";
-  font-style: normal;
-  font-weight: normal;
-  speak: none;
-
-  display: inline-block;
-  text-decoration: inherit;
-  width: 1em;
-  margin-right: .2em;
-  text-align: center;
-
-  font-variant: normal;
-  text-transform: none;
-
-  line-height: 1em;
-
-  margin-left: .2em;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-
 .episodes, .bookmarks {
   margin-top: 48px;
   max-height: 100v;
@@ -197,7 +132,7 @@ input[type=number]::-webkit-outer-spin-button {
   justify-content: center;
   min-height: 48px;
   min-width: 48px;
-  background-color: #f92977;
+  background-color: $primary-color;
   font-weight: bold;
   color: white;
 }
@@ -210,9 +145,4 @@ input[type=number]::-webkit-outer-spin-button {
 .bookmark-title {
   font-size: 1.1em;
   font-weight: bold;
-}
-
-
-.lean-right {
-  margin-left: auto;
 }

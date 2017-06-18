@@ -1,7 +1,7 @@
 import {h} from 'hyperapp';
 
 
-export function Link(props, children) {
+export default function Link(props, children) {
   return <a
     {...props}
     onclick={e => {

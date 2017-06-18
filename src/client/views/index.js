@@ -1,7 +1,7 @@
 import {h} from 'hyperapp';
 import Podcast from './podcast-entry';
 import {podcasts} from '../../../dist/data/podcasts-hardcoded';
-import {Link} from './components';
+import Link from './components/link';
 
 
 export default (state, actions) => {
