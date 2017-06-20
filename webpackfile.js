@@ -36,7 +36,8 @@ module.exports = [
             {loader: 'style-loader'},
             {loader: 'css-loader', query: {
               modules: true,
-              camelCase: 'dashesOnly'
+              camelCase: 'dashesOnly',
+              localIdentName: '[local]_[hash:base64:6]'
             }},
             {loader: 'sass-loader'}
           ]
