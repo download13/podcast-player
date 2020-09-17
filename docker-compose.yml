@@ -4,7 +4,9 @@ services:
     build: .
     restart: unless-stopped
     networks:
-      - webserver
+      webserver:
+        aliases:
+          - podcasts-server
     expose:
       - "80"
 
